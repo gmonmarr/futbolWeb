@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { auth, googleProvider } from "./firebase";
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import "./App.css"; // Make sure you import your CSS
+import "./login.css"; // Make sure you import your CSS
 
 function App() {
   const [user, setUser] = useState(null);
