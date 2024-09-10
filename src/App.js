@@ -11,6 +11,7 @@ function App() {
   const [newUser, setNewUser] = useState(false); // Track if it's a new user registering
 
   // Handle Google Sign-in
+  // prueba de git
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
