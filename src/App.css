@@ -5,7 +5,7 @@ body, html {
   display: flex;
   justify-content: center; /* Horizontally centers the login box */
   align-items: center; /* Vertically centers the login box */
-  /*background-image: url('champions.jpg');*/ /* Replace with your background image */
+  background-image: url('https://media.gq.com.mx/photos/663be862381688dfd248f3ea/16:9/w_2992,h_1683,c_limit/Final_de_la_Champions_League_2024_2151065209.jpg'); /* Replace with your background image */
   background-size: cover;
   background-position: center;
   font-family: Arial, sans-serif;
@@ -112,28 +112,26 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
+  padding: 10px; /* Adjust the padding to fit the logo */
   margin-top: 20px;
   background-color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
-  color: #444;
   transition: background-color 0.3s ease;
-  width: 100%;
+  width: 50px; /* Adjust button width for logo-only */
+  height: 50px; /* Make button square */
 }
 
 .google-login-btn img.google-logo {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
+  width: 30px; /* Size the logo */
+  height: 30px;
 }
 
 .google-login-btn:hover {
   background-color: #ddd;
 }
+
 
 /* Mobile responsive */
 @media (max-width: 768px) {

@@ -90,7 +90,7 @@ function App() {
             {/* Google login button with image */}
             <button className="google-login-btn" onClick={handleGoogleLogin}>
               <img
-                src="logo.png" /* Adjust path if needed */
+                src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg"
                 alt="Google logo"
                 className="google-logo"
               />
