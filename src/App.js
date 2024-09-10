@@ -1,17 +1,17 @@
-// src/App.js
 import React, { useState } from "react";
 import { auth, googleProvider } from "./firebase";
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import "./App.css"; // Make sure you import your CSS
 
 function App() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [newUser, setNewUser] = useState(false); // Toggle between login and registration
   const [error, setError] = useState("");
-  const [newUser, setNewUser] = useState(false); // Track if it's a new user registering
 
   // Handle Google Sign-in
-  // prueba de git
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -22,7 +22,7 @@ function App() {
     }
   };
 
-  // Handle Email/Password Sign-in
+  // Handle Email/Password Sign-in or Sign-up
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     try {
@@ -31,7 +31,7 @@ function App() {
         const result = await createUserWithEmailAndPassword(auth, email, password);
         setUser(result.user);
       } else {
-        // Sign in with existing account
+        // Sign in with an existing account
         const result = await signInWithEmailAndPassword(auth, email, password);
         setUser(result.user);
       }
@@ -48,40 +48,72 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <h1>React Firebase Auth with Google and Email/Password</h1>
-      {user ? (
-        <div>
-          <h2>Welcome, {user.displayName || user.email}</h2>
-          <button onClick={handleLogout}>Logout</button>
-        </div>
-      ) : (
-        <div>
-          <button onClick={handleGoogleLogin}>Login with Google</button>
-          <h3>Or Sign in with Email and Password</h3>
-          <form onSubmit={handleEmailLogin}>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button type="submit">{newUser ? "Sign Up" : "Login"}</button>
-          </form>
-          <button onClick={() => setNewUser(!newUser)}>
-            {newUser ? "Already have an account? Login" : "Create a new account"}
-          </button>
-          {error && <p style={{ color: "red" }}>{error}</p>}
-        </div>
-      )}
+    <div className="login-container">
+      <div className="login-box">
+        {user ? (
+          <div>
+            <h2>Welcome, {user.displayName || user.email}</h2>
+            <button onClick={handleLogout}>Logout</button>
+          </div>
+        ) : (
+          <>
+            <h2>Welcome</h2>
+            <form onSubmit={handleEmailLogin}>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <div className="remember-forgot">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={() => setRememberMe(!rememberMe)}
+                  />
+                  Remember me
+                </label>
+                <a href="#">Forgot password?</a>
+              </div>
+              <button type="submit">{newUser ? "Sign Up" : "Log In"}</button>
+            </form>
+            
+            {/* Google login button with image */}
+            <button className="google-login-btn" onClick={handleGoogleLogin}>
+              <img
+                src="logo.png" /* Adjust path if needed */
+                alt="Google logo"
+                className="google-logo"
+              />
+              Login with Google
+            </button>
+
+            <p>
+              {newUser ? (
+                "Already have an account? "
+              ) : (
+                "Don’t have an account? "
+              )}
+              <a
+                href="#"
+                onClick={() => setNewUser(!newUser)}
+              >
+                {newUser ? "Login" : "Register"}
+              </a>
+            </p>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+          </>
+        )}
+      </div>
     </div>
   );
 }
