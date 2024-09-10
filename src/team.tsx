@@ -33,9 +33,9 @@ import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 
-import Layout from './components/Layout.tsx';
-import Header from './components/Header.tsx';
-import Navigation from './components/Navigation.tsx';
+import Layout from './components_team/Layout.tsx';
+import Header from './components_team/Header.tsx';
+import Navigation from './components_team/Navigation.tsx';
 
 export default function TeamExample() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
