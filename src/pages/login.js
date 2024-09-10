@@ -1,6 +1,6 @@
-// src/login.js
+// src/pages/login.js
 import React, { useState, useEffect } from "react";
-import { auth, googleProvider } from "./firebase";
+import { auth, googleProvider } from "../firebase.js";
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { useNavigate } from "react-router-dom"; // For navigation
 import "./login.css"; // Make sure you import your CSS

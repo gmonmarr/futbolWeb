@@ -1,7 +1,7 @@
-// src/team.tsx
+// src/pages/team.tsx
 
 import * as React from 'react';
-import { auth } from './firebase'; // Import Firebase authentication
+import { auth } from '../firebase.js'; // Import Firebase authentication
 import { useNavigate } from 'react-router-dom'; // To redirect after logout
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
@@ -17,9 +17,9 @@ import ListItemContent from '@mui/joy/ListItemContent';
 import Sheet from '@mui/joy/Sheet';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import Stack from '@mui/joy/Stack';  // Import Stack component
-import Layout from './components_team/Layout.tsx';
-import Header from './components_team/Header.tsx';
-import Navigation from './components_team/Navigation.tsx';
+import Layout from '../components_team/Layout.tsx';
+import Header from '../components_team/Header.tsx';
+import Navigation from '../components_team/Navigation.tsx';
 import './team.css'; // Import the CSS file
 
 interface TeamData {

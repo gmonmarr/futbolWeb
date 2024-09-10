@@ -3,8 +3,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Import React Router components
 import './index.css';
-import Login from './login';
-import Team from './team.tsx';
+import Login from './pages/login.js';
+import Team from './pages/team.tsx';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
