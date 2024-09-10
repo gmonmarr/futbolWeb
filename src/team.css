@@ -1,0 +1,60 @@
+/* 
+/src/team.css 
+Root layout styles
+*/
+
+.team-layout-root {
+height: 100vh;
+overflow: hidden;
+}
+
+.team-header-box {
+padding: 16px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.team-tab-bar {
+justify-content: space-around;
+display: flex;
+position: fixed;
+width: 100%;
+bottom: 0;
+z-index: 999;
+padding: 16px 0;
+background-color: var(--joy-palette-background-body, #fff);
+border-top: 1px solid var(--joy-palette-divider, #e0e0e0);
+}
+
+/* People list styles */
+.team-people-list {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+gap: 16px;
+}
+
+.team-person-sheet {
+border-radius: var(--joy-radius-sm, 4px);
+padding: 16px;
+list-style: none;
+}
+
+.team-person-avatar {
+border-radius: 50%;
+}
+
+.team-person-info {
+display: flex;
+gap: 16px;
+}
+
+.team-divider {
+margin: 16px 0;
+}
+
+.team-skill-chips {
+margin-top: 16px;
+display: flex;
+gap: 8px;
+}
