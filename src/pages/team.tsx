@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { auth } from '../firebase.js'; // This should now reference the auth initialized in firebase.js
-import { signOut, onAuthStateChanged, User } from 'firebase/auth'; // Import specific functions from Firebase Auth
-import { useNavigate } from 'react-router-dom'; // To redirect after logout
+import { signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
@@ -10,12 +9,15 @@ import Button from '@mui/joy/Button';
 import List from '@mui/joy/List';
 import Divider from '@mui/joy/Divider';
 import Sheet from '@mui/joy/Sheet';
-import PersonRoundedIcon from '@mui/icons-material/PersonRounded'; // Use this icon for the avatar
-import Stack from '@mui/joy/Stack';  // Import Stack component
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
+import Stack from '@mui/joy/Stack';
 import Layout from '../components_team/Layout.tsx';
 import Header from '../components_team/Header.tsx';
 import Navigation from '../components_team/Navigation.tsx';
-import './team.css'; // Import the CSS file
+import './team.css';
+
+// Import Firestore functions
+import { auth, db, doc, getDoc, updateDoc } from '../firebase'; 
 
 interface Person {
   name: string;
@@ -26,66 +28,80 @@ interface Person {
 
 export default function TeamExample() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const navigate = useNavigate(); // To redirect user after logout
-  const [peopleData, setPeopleData] = React.useState<Person[]>([]); // Dynamic list of people
+  const navigate = useNavigate();
+  const [peopleData, setPeopleData] = React.useState<Person[]>([]); 
   const [newPlayer, setNewPlayer] = React.useState<Person>({
     name: '',
     lastName: '',
     matricula: '',
     category: '',
   });
-  const [showAddPlayerForm, setShowAddPlayerForm] = React.useState(false);
-  const [currentUser, setCurrentUser] = React.useState<User | null>(null); // Correctly type currentUser
+  const [teamName, setTeamName] = React.useState<string | null>(null); 
+  const [currentUser, setCurrentUser] = React.useState<User | null>(null); 
+  const [showAddPlayerForm, setShowAddPlayerForm] = React.useState(false); // Para controlar el formulario
 
+  // Obtener el estado del usuario actual y cargar los datos del equipo
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        const storedPlayers = localStorage.getItem(`players_${user.uid}`);
-        if (storedPlayers) {
-          setPeopleData(JSON.parse(storedPlayers));
+
+        // Verificar si el documento del equipo existe en Firestore
+        const teamDocRef = doc(db, 'teams', user.uid);
+        const teamDoc = await getDoc(teamDocRef);
+        if (teamDoc.exists()) {
+          const teamData = teamDoc.data();
+          setTeamName(teamData?.teamName || '');
+          if (teamData?.players) {
+            setPeopleData(teamData.players); // Cargar los jugadores si ya existen
+          }
+        } else {
+          console.error("No se encontró el equipo para este usario");
         }
       } else {
         setCurrentUser(null);
-        setPeopleData([]); // Clear player data when logged out
+        setPeopleData([]); 
+        setTeamName(null); 
       }
     });
 
-    return () => unsubscribe(); // Cleanup listener on component unmount
+    return () => unsubscribe(); 
   }, []);
 
-  // Save players to localStorage whenever peopleData changes and the user is logged in
+  // Guardar los jugadores en Firestore cuando cambien los datos
   React.useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem(`players_${currentUser.uid}`, JSON.stringify(peopleData));
+    if (currentUser && teamName) {
+      const teamDocRef = doc(db, 'teams', currentUser.uid);
+      updateDoc(teamDocRef, { players: peopleData });
     }
-  }, [peopleData, currentUser]);
+  }, [peopleData, currentUser, teamName]);
 
-  // Logout function
+  // Función para cerrar sesión
   const handleLogout = () => {
     signOut(auth).then(() => {
-      console.log('User logged out');
-      navigate('/'); // Redirect to login page after logout
+      navigate('/');
     }).catch((error) => {
       console.error('Logout error:', error);
     });
   };
 
+  // Función para agregar un nuevo jugador
   const handleAddPlayer = () => {
     if (newPlayer.name && newPlayer.lastName && newPlayer.matricula && newPlayer.category) {
       setPeopleData([...peopleData, newPlayer]);
-      setShowAddPlayerForm(false); // Hide form after adding player
       setNewPlayer({
         name: '',
         lastName: '',
         matricula: '',
         category: '',
       });
+      setShowAddPlayerForm(false); // Ocultar el formulario al agregar
     } else {
       alert("Please fill in all fields.");
     }
   };
 
+  // Función para eliminar un jugador
   const handleDeletePlayer = (index: number) => {
     const updatedPeople = peopleData.filter((_, i) => i !== index);
     setPeopleData(updatedPeople);
@@ -118,11 +134,12 @@ export default function TeamExample() {
         </Layout.SideNav>
         <Layout.SidePane>
           <Box className="team-header-box">
+            {/* Mostrar el nombre del equipo */}
             <Typography level="title-lg" textColor="text.secondary" component="h1">
-              People
+              {teamName ? `Team: ${teamName}` : "Loading team..."}
             </Typography>
             <Button startDecorator={<PersonRoundedIcon />} size="sm" onClick={() => setShowAddPlayerForm(true)}>
-              Add new
+              Add new Player
             </Button>
             <Button onClick={handleLogout} variant="outlined" size="sm" color="danger">
               Logout

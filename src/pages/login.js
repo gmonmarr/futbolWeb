@@ -1,131 +1,106 @@
-// src/pages/login.js
 import React, { useState, useEffect } from "react";
-import { auth, googleProvider } from "../firebase.js";
-import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, setPersistence, browserLocalPersistence } from "firebase/auth";
-import { useNavigate } from "react-router-dom"; // For navigation
-import "./login.css"; // Make sure you import your CSS
-import Team from "./team.tsx"; // Import the Team component
+import { auth, googleProvider, db, doc, setDoc, getDoc } from "../firebase";
+import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+
+// Función para guardar los datos del equipo en Firestore
+const saveTeamData = async (userId, teamName) => {
+  const teamDocRef = doc(db, 'teams', userId);  // Guardamos el equipo bajo el ID del usuario
+  try {
+    await setDoc(teamDocRef, {
+      teamName: teamName, // Guardar el nombre del equipo
+      players: [],        // Inicializar la lista de jugadores vacía
+    });
+    console.log("Team data saved successfully");
+  } catch (error) {
+    console.error("Error saving team data: ", error);
+  }
+};
 
 function Login() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [newUser, setNewUser] = useState(false); // Toggle between login and registration
-  const [name, setName] = useState(""); // Store name if needed
+  const [isCaptain, setIsCaptain] = useState(false); // Para marcar si el usuario es capitán
+  const [teamName, setTeamName] = useState(""); // Para el nombre del equipo
+  const [newUser, setNewUser] = useState(false); // Para alternar entre login y registro
   const [error, setError] = useState("");
-  const [requireName, setRequireName] = useState(false); // Ask for name if needed
-  const navigate = useNavigate(); // For navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Set Firebase Auth Persistence when the component mounts
-    setPersistence(auth, browserLocalPersistence)
-      .then(() => {
-        // Check if a user is already logged in
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-          setUser(currentUser);
-          if (!currentUser.displayName) {
-            setRequireName(true); // Ask for the name if displayName is missing
-          } else {
-            navigate("/team"); // Redirect to Team page if already logged in
-          }
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to set persistence:", err.message);
-      });
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        navigate("/team"); // Redirigir si ya está logueado
+      }
+    });
+    return () => unsubscribe();
   }, [navigate]);
 
-  // Handle Google Sign-in
-  const handleGoogleLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      setUser(result.user);
-      setError("");
-      navigate("/team"); // Redirect to Team page after Google sign-in
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Handle Email/Password Sign-in or Sign-up
-  const handleEmailLogin = async (e) => {
+  // Registrar el usuario y almacenar los datos en Firestore
+  const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      let result;
-      if (newUser) {
-        // Create a new account
-        result = await createUserWithEmailAndPassword(auth, email, password);
-      } else {
-        // Sign in with an existing account
-        result = await signInWithEmailAndPassword(auth, email, password);
-      }
-      setUser(result.user);
-      setError("");
+      const result = await createUserWithEmailAndPassword(auth, email, password);
 
-      // If displayName is missing, prompt for the name
-      if (!result.user.displayName) {
-        setRequireName(true);
-      } else {
-        navigate("/team"); // Redirect to Team page
-      }
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Handle setting user displayName if it's missing
-  const handleSetName = async () => {
-    try {
-      await updateProfile(auth.currentUser, {
-        displayName: name,
+      // Almacenar el nombre del usuario
+      await updateProfile(result.user, {
+        displayName: email.split('@')[0], // Usar el nombre antes del @ como displayName
       });
-      setRequireName(false);
-      navigate("/team"); // Redirect to Team page after name is set
-    } catch (err) {
-      setError(err.message);
+
+      // Almacenar la información del usuario en Firestore
+      await setDoc(doc(db, "users", result.user.uid), {
+        isCaptain: isCaptain,
+        teamName: isCaptain ? teamName : null, // Si es capitán, guardar el nombre del equipo
+        email: email,
+      });
+
+      // Si el usuario es capitán, guardar los datos del equipo en la colección `teams`
+      if (isCaptain && teamName) {
+        await saveTeamData(result.user.uid, teamName);  // Guardar el equipo con el UID del usuario
+      }
+
+      // Redirigir a la página de equipo
+      navigate("/team");
+
+    } catch (error) {
+      setError(error.message);
     }
   };
 
-  // Handle Logout
-  const handleLogout = () => {
-    auth.signOut();
-    setUser(null);
-  };
+  // Iniciar sesión con email y contraseña
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      setUser(result.user);
 
-  if (requireName) {
-    // If name is required, show a form to ask for it
-    return (
-      <div className="login-container">
-        <div className="login-box">
-          <h2>Please enter your name</h2>
-          <input
-            type="text"
-            placeholder="Enter your name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <button onClick={handleSetName}>Submit</button>
-          {error && <p style={{ color: "red" }}>{error}</p>}
-        </div>
-      </div>
-    );
-  }
+      // Verificar si es capitán al iniciar sesión
+      const userDoc = await getDoc(doc(db, "users", result.user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.isCaptain) {
+          navigate("/team");  // Redirigir a la página de equipo
+        } else {
+          navigate("/player-dashboard");
+        }
+      }
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
   return (
     <div className="login-container">
       <div className="login-box">
         {user ? (
           <div>
-            <h2>Welcome, {user.displayName || user.email}</h2>
-            <button onClick={handleLogout}>Logout</button>
+            <h2>Welcome, {user.displayName}</h2>
           </div>
         ) : (
           <>
-            <h2>Welcome</h2>
-            <form onSubmit={handleEmailLogin}>
+            <h2>{newUser ? "Register" : "Login"}</h2>
+            <form onSubmit={newUser ? handleRegister : handleLogin}>
               <input
                 type="email"
                 placeholder="Enter your email"
@@ -140,39 +115,34 @@ function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <div className="remember-forgot">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={() => setRememberMe(!rememberMe)}
-                  />
-                  Remember me
-                </label>
-                <a href="#">Forgot password?</a>
-              </div>
-              <button type="submit">{newUser ? "Sign Up" : "Log In"}</button>
-            </form>
-            
-            {/* Google login button with image */}
-            <button className="google-login-btn" onClick={handleGoogleLogin}>
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
-                alt="Google logo"
-                className="google-logo"
-              />
-            </button>
 
-            <p>
-              {newUser ? (
-                "Already have an account? "
-              ) : (
-                "Don’t have an account? "
+              {newUser && (
+                <>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={isCaptain}
+                      onChange={() => setIsCaptain(!isCaptain)}
+                    />
+                    Are you a captain?
+                  </label>
+                  {isCaptain && (
+                    <input
+                      type="text"
+                      placeholder="Enter your team name"
+                      value={teamName}
+                      onChange={(e) => setTeamName(e.target.value)}
+                      required
+                    />
+                  )}
+                </>
               )}
-              <a
-                href="#"
-                onClick={() => setNewUser(!newUser)}
-              >
+
+              <button type="submit">{newUser ? "Sign Up" : "Login"}</button>
+            </form>
+            <p>
+              {newUser ? "Already have an account?" : "Don’t have an account?"}
+              <a href="#" onClick={() => setNewUser(!newUser)}>
                 {newUser ? "Login" : "Register"}
               </a>
             </p>
