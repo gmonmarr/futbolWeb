@@ -1,3 +1,5 @@
+/* src/pages/login.js */
+
 import React, { useState, useEffect } from "react";
 import { auth, googleProvider, db, doc, setDoc, getDoc } from "../firebase";
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from "firebase/auth";

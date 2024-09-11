@@ -1,3 +1,5 @@
+// src/components_team/Layout.tsx
+
 import * as React from 'react';
 import Box, { BoxProps } from '@mui/joy/Box';
 import Sheet from '@mui/joy/Sheet';

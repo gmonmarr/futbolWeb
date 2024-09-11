@@ -1,3 +1,5 @@
+// src/pages/team.tsx
+
 import * as React from 'react';
 import { signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';

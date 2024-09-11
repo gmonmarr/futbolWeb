@@ -1,3 +1,5 @@
+// src/components_team/Header.tsx
+
 import * as React from 'react';
 import { useColorScheme } from '@mui/joy/styles';
 import Box from '@mui/joy/Box';
@@ -16,7 +18,6 @@ import ListDivider from '@mui/joy/ListDivider';
 import Drawer from '@mui/joy/Drawer';
 import ModalClose from '@mui/joy/ModalClose';
 import DialogTitle from '@mui/joy/DialogTitle';
-
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
