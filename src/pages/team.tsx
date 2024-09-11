@@ -1,112 +1,92 @@
 // src/pages/team.tsx
 
 import * as React from 'react';
-import { signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import Button from '@mui/joy/Button';
-import List from '@mui/joy/List';
-import Divider from '@mui/joy/Divider';
-import Sheet from '@mui/joy/Sheet';
-import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
-import Stack from '@mui/joy/Stack';
 import Layout from '../components_team/Layout.tsx';
 import Header from '../components_team/Header.tsx';
 import Navigation from '../components_team/Navigation.tsx';
 import './team.css';
 
-// Import Firestore functions
-import { auth, db, doc, getDoc, updateDoc } from '../firebase'; 
-
-interface Person {
-  name: string;
-  lastName: string;
-  matricula: string;
-  category: string;
-}
+// Import Firebase services
+import { auth, db } from '../firebase'; // Your Firebase config file
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'; // Firestore functions
 
 export default function TeamExample() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const navigate = useNavigate();
-  const [peopleData, setPeopleData] = React.useState<Person[]>([]); 
-  const [newPlayer, setNewPlayer] = React.useState<Person>({
-    name: '',
-    lastName: '',
-    matricula: '',
-    category: '',
-  });
-  const [teamName, setTeamName] = React.useState<string | null>(null); 
-  const [currentUser, setCurrentUser] = React.useState<User | null>(null); 
-  const [showAddPlayerForm, setShowAddPlayerForm] = React.useState(false); // Para controlar el formulario
+  const [currentUser, setCurrentUser] = React.useState<User | null>(null);
+  const [userData, setUserData] = React.useState<any>(null); // User-specific data
+  const [teamName, setTeamName] = React.useState(''); // State to handle team name input
+  const [errorMessage, setErrorMessage] = React.useState(''); // Error message state
+  const [loading, setLoading] = React.useState(false); // Loading state
 
-  // Obtener el estado del usuario actual y cargar los datos del equipo
+  // Get the current user and load their own data
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
 
-        // Verificar si el documento del equipo existe en Firestore
-        const teamDocRef = doc(db, 'teams', user.uid);
-        const teamDoc = await getDoc(teamDocRef);
-        if (teamDoc.exists()) {
-          const teamData = teamDoc.data();
-          setTeamName(teamData?.teamName || '');
-          if (teamData?.players) {
-            setPeopleData(teamData.players); // Cargar los jugadores si ya existen
-          }
+        // Fetch the current user's personal data
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setUserData(userDoc.data());
         } else {
-          console.error("No se encontró el equipo para este usario");
+          console.error('User data not found');
         }
       } else {
         setCurrentUser(null);
-        setPeopleData([]); 
-        setTeamName(null); 
+        setUserData(null);
       }
     });
 
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, []);
 
-  // Guardar los jugadores en Firestore cuando cambien los datos
-  React.useEffect(() => {
-    if (currentUser && teamName) {
-      const teamDocRef = doc(db, 'teams', currentUser.uid);
-      updateDoc(teamDocRef, { players: peopleData });
+  // Handle creating a team
+  const handleCreateTeam = async () => {
+    if (!teamName) {
+      setErrorMessage('Please enter a team name.');
+      return;
     }
-  }, [peopleData, currentUser, teamName]);
 
-  // Función para cerrar sesión
-  const handleLogout = () => {
-    signOut(auth).then(() => {
-      navigate('/');
-    }).catch((error) => {
-      console.error('Logout error:', error);
-    });
-  };
+    try {
+      setLoading(true);
 
-  // Función para agregar un nuevo jugador
-  const handleAddPlayer = () => {
-    if (newPlayer.name && newPlayer.lastName && newPlayer.matricula && newPlayer.category) {
-      setPeopleData([...peopleData, newPlayer]);
-      setNewPlayer({
-        name: '',
-        lastName: '',
-        matricula: '',
-        category: '',
+      // Create a new team in Firestore
+      const teamDocRef = doc(db, 'teams', teamName);
+      await setDoc(teamDocRef, {
+        teamName: teamName,
+        leader: currentUser?.uid,
+        players: [currentUser?.uid], // Leader is automatically part of the players array
+        joinRequests: [], // Empty array for join requests
       });
-      setShowAddPlayerForm(false); // Ocultar el formulario al agregar
-    } else {
-      alert("Please fill in all fields.");
-    }
-  };
 
-  // Función para eliminar un jugador
-  const handleDeletePlayer = (index: number) => {
-    const updatedPeople = peopleData.filter((_, i) => i !== index);
-    setPeopleData(updatedPeople);
+      // Update the user's role to Leader
+      const userDocRef = doc(db, 'users', currentUser?.uid);
+      await updateDoc(userDocRef, {
+        role: 'Leader',
+        teamName: teamName, // Save the team name under the user
+      });
+
+      // Fetch updated user data
+      const updatedUserDoc = await getDoc(userDocRef);
+      setUserData(updatedUserDoc.data());
+
+      setErrorMessage(''); // Clear any error messages
+      setTeamName(''); // Clear the team name input
+    } catch (error) {
+      console.error('Error creating team: ', error);
+      setErrorMessage('Failed to create the team.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -117,16 +97,6 @@ export default function TeamExample() {
           <Navigation />
         </Layout.SideDrawer>
       )}
-      <Stack id="tab-bar" direction="row" className="team-tab-bar">
-        <Button
-          variant="plain"
-          color="neutral"
-          size="sm"
-          startDecorator={<PersonRoundedIcon />}
-        >
-          Team
-        </Button>
-      </Stack>
       <Layout.Root className={drawerOpen ? 'team-layout-root' : ''}>
         <Layout.Header>
           <Header />
@@ -136,71 +106,65 @@ export default function TeamExample() {
         </Layout.SideNav>
         <Layout.SidePane>
           <Box className="team-header-box">
-            {/* Mostrar el nombre del equipo */}
-            <Typography level="title-lg" textColor="text.secondary" component="h1">
-              {teamName ? `Team: ${teamName}` : "Loading team..."}
-            </Typography>
-            <Button startDecorator={<PersonRoundedIcon />} size="sm" onClick={() => setShowAddPlayerForm(true)}>
-              Add new Player
-            </Button>
-            <Button onClick={handleLogout} variant="outlined" size="sm" color="danger">
-              Logout
-            </Button>
-          </Box>
+            {currentUser ? (
+              <>
+                {/* Show only the user's personal data */}
+                <Typography level="title-lg" textColor="text.secondary" component="h1">
+                  {userData ? `Welcome, ${userData.name || 'User'}` : 'Loading...'}
+                </Typography>
+                <Typography level="body-md" textColor="text.secondary" component="p">
+                  Matricula: {userData?.matriculaTEC || 'N/A'}
+                </Typography>
+                <Typography level="body-md" textColor="text.secondary" component="p">
+                  Email: {currentUser.email}
+                </Typography>
+                <Typography level="body-md" textColor="text.secondary" component="p">
+                  Role: {userData?.role || 'N/A'}
+                </Typography>
 
-          {showAddPlayerForm && (
-            <Box>
-              <input
-                type="text"
-                placeholder="Player Name"
-                value={newPlayer.name}
-                onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
-              />
-              <input
-                type="text"
-                placeholder="Last Name"
-                value={newPlayer.lastName}
-                onChange={(e) => setNewPlayer({ ...newPlayer, lastName: e.target.value })}
-              />
-              <input
-                type="text"
-                placeholder="Matricula"
-                value={newPlayer.matricula}
-                onChange={(e) => setNewPlayer({ ...newPlayer, matricula: e.target.value })}
-              />
-              <input
-                type="text"
-                placeholder="Category"
-                value={newPlayer.category}
-                onChange={(e) => setNewPlayer({ ...newPlayer, category: e.target.value })}
-              />
-              <Button onClick={handleAddPlayer}>Save Player</Button>
-            </Box>
-          )}
+                <Button
+                  variant="outlined"
+                  size="sm"
+                  onClick={() => navigate('/settings')}
+                  sx={{ mt: 2 }}
+                >
+                  Settings
+                </Button>
 
-          <List className="team-people-list">
-            {peopleData.map((person, index) => (
-              <Sheet
-                key={index}
-                component="li"
-                variant="outlined"
-                className="team-person-sheet"
-              >
-                <Box className="team-person-info">
-                  <PersonRoundedIcon sx={{ fontSize: 40, color: 'gray' }} />
-                  <div>
-                    <Typography level="title-md">{person.name} {person.lastName}</Typography>
-                    <Typography level="body-xs">Matricula: {person.matricula}</Typography>
-                    <Typography level="body-xs">Category: {person.category}</Typography>
-                  </div>
-                  <Button variant="outlined" color="danger" size="sm" onClick={() => handleDeletePlayer(index)}>
-                    Delete
+                {/* Form to create a new team */}
+                <Box sx={{ mt: 3 }}>
+                  <Typography level="title-md" component="p" sx={{ mb: 1 }}>
+                    Create a new team:
+                  </Typography>
+                  <input
+                    type="text"
+                    placeholder="Enter team name"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    required
+                  />
+                  <Button
+                    variant="contained"
+                    size="sm"
+                    sx={{ ml: 2 }}
+                    onClick={handleCreateTeam}
+                    disabled={loading}
+                  >
+                    {loading ? 'Creating...' : 'Create Team'}
                   </Button>
+                  {errorMessage && (
+                    <Typography level="body-md" sx={{ color: 'red', mt: 1 }}>
+                      {errorMessage}
+                    </Typography>
+                  )}
                 </Box>
-                <Divider className="team-divider" />
-              </Sheet>
-            ))}
-          </List>
+              </>
+            ) : (
+              <Typography level="title-lg" textColor="text.secondary" component="h1">
+                No user logged in. Please log in to view your data.
+              </Typography>
+            )}
+          </Box>
         </Layout.SidePane>
       </Layout.Root>
     </CssVarsProvider>

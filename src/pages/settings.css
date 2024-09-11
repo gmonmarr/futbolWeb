@@ -1,0 +1,46 @@
+/* src/pages/settings.css */
+
+.settings-container {
+width: 100%;
+max-width: 600px;
+margin: 0 auto;
+padding: 20px;
+}
+
+h2 {
+text-align: center;
+}
+
+form {
+margin-bottom: 20px;
+}
+
+label {
+display: block;
+margin-bottom: 10px;
+}
+
+input {
+width: 100%;
+padding: 10px;
+margin-bottom: 10px;
+border: 1px solid #ccc;
+border-radius: 4px;
+}
+
+button {
+padding: 10px 20px;
+border: none;
+background-color: #28a745;
+color: #fff;
+cursor: pointer;
+border-radius: 4px;
+}
+
+button:hover {
+background-color: #218838;
+}
+
+p {
+text-align: center;
+}

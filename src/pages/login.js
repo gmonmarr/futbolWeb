@@ -1,91 +1,119 @@
-/* src/pages/login.js */
+// src/pages/login.js
 
 import React, { useState, useEffect } from "react";
 import { auth, googleProvider, db, doc, setDoc, getDoc } from "../firebase";
-import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from "firebase/auth";
+import {
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  onAuthStateChanged,
+} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-
-// Función para guardar los datos del equipo en Firestore
-const saveTeamData = async (userId, teamName) => {
-  const teamDocRef = doc(db, 'teams', userId);  // Guardamos el equipo bajo el ID del usuario
-  try {
-    await setDoc(teamDocRef, {
-      teamName: teamName, // Guardar el nombre del equipo
-      players: [],        // Inicializar la lista de jugadores vacía
-    });
-    console.log("Team data saved successfully");
-  } catch (error) {
-    console.error("Error saving team data: ", error);
-  }
-};
 
 function Login() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isCaptain, setIsCaptain] = useState(false); // Para marcar si el usuario es capitán
-  const [teamName, setTeamName] = useState(""); // Para el nombre del equipo
-  const [newUser, setNewUser] = useState(false); // Para alternar entre login y registro
+  const [name, setName] = useState(""); // New state for Name
+  const [matriculaTEC, setMatriculaTEC] = useState(""); // Matricula TEC
+  const [newUser, setNewUser] = useState(false); // Toggle between login and registration
   const [error, setError] = useState("");
+  const [isProfileComplete, setIsProfileComplete] = useState(false); // New state to track if profile is complete
   const navigate = useNavigate();
 
+  // Handle user session state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        navigate("/team"); // Redirigir si ya está logueado
+
+        // Check if the user has completed their profile (matriculaTEC)
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.matriculaTEC) {
+            setIsProfileComplete(true);
+            navigate("/team"); // Redirect to /team only if profile is complete
+          } else {
+            setIsProfileComplete(false); // Show profile completion form
+          }
+        }
       }
     });
     return () => unsubscribe();
   }, [navigate]);
 
-  // Registrar el usuario y almacenar los datos en Firestore
+  // Register user
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-
-      // Almacenar el nombre del usuario
-      await updateProfile(result.user, {
-        displayName: email.split('@')[0], // Usar el nombre antes del @ como displayName
-      });
-
-      // Almacenar la información del usuario en Firestore
-      await setDoc(doc(db, "users", result.user.uid), {
-        isCaptain: isCaptain,
-        teamName: isCaptain ? teamName : null, // Si es capitán, guardar el nombre del equipo
-        email: email,
-      });
-
-      // Si el usuario es capitán, guardar los datos del equipo en la colección `teams`
-      if (isCaptain && teamName) {
-        await saveTeamData(result.user.uid, teamName);  // Guardar el equipo con el UID del usuario
+      if (!name) {
+        setError("Name is required for registration.");
+        return;
       }
 
-      // Redirigir a la página de equipo
-      navigate("/team");
+      const result = await createUserWithEmailAndPassword(auth, email, password);
 
+      // Update user profile with name
+      await updateProfile(result.user, {
+        displayName: name, // Use provided name
+      });
+
+      // Store user info in Firestore
+      await setDoc(doc(db, "users", result.user.uid), {
+        name: name,
+        matriculaTEC: matriculaTEC,
+        email: email,
+        role: "Player", // Default role as Player
+      });
+
+      navigate("/team"); // Redirect after registration
     } catch (error) {
       setError(error.message);
     }
   };
 
-  // Iniciar sesión con email y contraseña
+  // Handle Google Sign-In
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const googleUser = result.user;
+
+      setEmail(googleUser.email);
+      setUser(googleUser);
+
+      // Check if profile is complete
+      const userDoc = await getDoc(doc(db, "users", googleUser.uid));
+      if (!userDoc.exists() || !userDoc.data().matriculaTEC) {
+        setIsProfileComplete(false); // Show form to complete profile
+      } else {
+        setIsProfileComplete(true);
+        navigate("/team"); // Redirect if profile is complete
+      }
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       setUser(result.user);
 
-      // Verificar si es capitán al iniciar sesión
+      // Check if user exists and has completed profile
       const userDoc = await getDoc(doc(db, "users", result.user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        if (userData.isCaptain) {
-          navigate("/team");  // Redirigir a la página de equipo
+        if (userData.matriculaTEC) {
+          navigate("/team"); // Redirect if profile is complete
         } else {
-          navigate("/player-dashboard");
+          setIsProfileComplete(false); // Show form to complete profile
         }
+      } else {
+        setError("User data not found");
       }
     } catch (error) {
       setError(error.message);
@@ -95,9 +123,9 @@ function Login() {
   return (
     <div className="login-container">
       <div className="login-box">
-        {user ? (
+        {user && isProfileComplete ? (
           <div>
-            <h2>Welcome, {user.displayName}</h2>
+            <h2>Welcome, {user.displayName || user.email}</h2>
           </div>
         ) : (
           <>
@@ -118,36 +146,40 @@ function Login() {
                 required
               />
 
+              {/* Prompt for Name and Matricula TEC only if signing up */}
               {newUser && (
                 <>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={isCaptain}
-                      onChange={() => setIsCaptain(!isCaptain)}
-                    />
-                    Are you a captain?
-                  </label>
-                  {isCaptain && (
-                    <input
-                      type="text"
-                      placeholder="Enter your team name"
-                      value={teamName}
-                      onChange={(e) => setTeamName(e.target.value)}
-                      required
-                    />
-                  )}
+                  <input
+                    type="text"
+                    placeholder="Enter your Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Enter your Matricula TEC"
+                    value={matriculaTEC}
+                    onChange={(e) => setMatriculaTEC(e.target.value)}
+                    required
+                  />
                 </>
               )}
 
               <button type="submit">{newUser ? "Sign Up" : "Login"}</button>
             </form>
+
+            <button onClick={handleGoogleLogin}>
+              Login with Google
+            </button>
+
             <p>
               {newUser ? "Already have an account?" : "Don’t have an account?"}
               <a href="#" onClick={() => setNewUser(!newUser)}>
                 {newUser ? "Login" : "Register"}
               </a>
             </p>
+
             {error && <p style={{ color: "red" }}>{error}</p>}
           </>
         )}

@@ -1,8 +1,10 @@
+// src/firebase.js
+
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore"; // Firestore imports
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 
-// Configuración de Firebase usando las variables de entorno
+// Firebase configuration using environment variables for security
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -13,13 +15,15 @@ const firebaseConfig = {
   measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
-// Inicializa Firebase
+// Initialize Firebase app
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app); // Cambia Realtime Database por Firestore
 
-// Google Auth Provider
+// Initialize Firebase Authentication and Firestore
+const auth = getAuth(app);
+const db = getFirestore(app);  // Firestore for database
+
+// Google Auth Provider (for Google sign-in)
 const googleProvider = new GoogleAuthProvider();
 
-// Exporta los servicios y funciones necesarios de Firebase
+// Export the Firebase services and Firestore utility functions
 export { auth, googleProvider, db, doc, setDoc, getDoc, updateDoc };

@@ -21,29 +21,38 @@ import DialogTitle from '@mui/joy/DialogTitle';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
-import BookRoundedIcon from '@mui/icons-material/BookRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
-import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-
 import TeamNav from './Navigation.tsx';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
+
+// Define the shape of userData
+interface UserData {
+  name: string;
+  email: string;
+}
 
 function ColorSchemeToggle() {
   const { mode, setMode } = useColorScheme();
   const [mounted, setMounted] = React.useState(false);
+
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
   if (!mounted) {
     return <IconButton size="sm" variant="outlined" color="primary" />;
   }
+
   return (
     <Tooltip title="Change theme" variant="outlined">
       <IconButton
-        data-screenshot="toggle-mode"
         size="sm"
         variant="plain"
         color="neutral"
@@ -64,6 +73,33 @@ function ColorSchemeToggle() {
 
 export default function Header() {
   const [open, setOpen] = React.useState(false);
+  const [userData, setUserData] = React.useState<UserData | null>(null);
+  const navigate = useNavigate();
+
+  // Fetch user data from Firestore
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          setUserData(userDoc.data() as UserData); // Cast to UserData type
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        navigate('/login');
+      })
+      .catch((error) => {
+        console.error('Logout error:', error);
+      });
+  };
+
   return (
     <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'space-between' }}>
       <Stack
@@ -115,6 +151,7 @@ export default function Header() {
           Files
         </Button>
       </Stack>
+
       <Box sx={{ display: { xs: 'inline-flex', sm: 'none' } }}>
         <IconButton variant="plain" color="neutral" onClick={() => setOpen(true)}>
           <MenuRoundedIcon />
@@ -131,6 +168,7 @@ export default function Header() {
           </Box>
         </Drawer>
       </Box>
+
       <Box
         sx={{
           display: 'flex',
@@ -163,6 +201,7 @@ export default function Header() {
             },
           }}
         />
+
         <IconButton
           size="sm"
           variant="outlined"
@@ -171,19 +210,9 @@ export default function Header() {
         >
           <SearchRoundedIcon />
         </IconButton>
-        <Tooltip title="Joy UI overview" variant="outlined">
-          <IconButton
-            size="sm"
-            variant="plain"
-            color="neutral"
-            component="a"
-            href="/blog/first-look-at-joy/"
-            sx={{ alignSelf: 'center' }}
-          >
-            <BookRoundedIcon />
-          </IconButton>
-        </Tooltip>
+
         <ColorSchemeToggle />
+
         <Dropdown>
           <MenuButton
             variant="plain"
@@ -196,6 +225,7 @@ export default function Header() {
               sx={{ maxWidth: '32px', maxHeight: '32px' }}
             />
           </MenuButton>
+
           <Menu
             placement="bottom-end"
             size="sm"
@@ -206,46 +236,41 @@ export default function Header() {
               '--ListItem-radius': 'var(--joy-radius-sm)',
             }}
           >
-            <MenuItem>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar
-                  src="https://i.pravatar.cc/40?img=2"
-                  srcSet="https://i.pravatar.cc/80?img=2"
-                  sx={{ borderRadius: '50%' }}
-                />
-                <Box sx={{ ml: 1.5 }}>
-                  <Typography level="title-sm" textColor="text.primary">
-                    Rick Sanchez
-                  </Typography>
-                  <Typography level="body-xs" textColor="text.tertiary">
-                    rick@email.com
-                  </Typography>
+            {userData && (
+              <MenuItem>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar
+                    src="https://i.pravatar.cc/40?img=2"
+                    srcSet="https://i.pravatar.cc/80?img=2"
+                    sx={{ borderRadius: '50%' }}
+                  />
+                  <Box sx={{ ml: 1.5 }}>
+                    <Typography level="title-sm" textColor="text.primary">
+                      {userData.name}
+                    </Typography>
+                    <Typography level="body-xs" textColor="text.tertiary">
+                      {userData.email}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </MenuItem>
+              </MenuItem>
+            )}
+
             <ListDivider />
+
             <MenuItem>
               <HelpRoundedIcon />
               Help
             </MenuItem>
-            <MenuItem>
+
+            <MenuItem onClick={() => navigate('/settings')}>
               <SettingsRoundedIcon />
               Settings
             </MenuItem>
+
             <ListDivider />
-            <MenuItem component="a" href="/blog/first-look-at-joy/">
-              First look at Joy UI
-              <OpenInNewRoundedIcon />
-            </MenuItem>
-            <MenuItem
-              component="a"
-              href="https://github.com/mui/material-ui/tree/master/docs/data/joy/getting-started/templates/email"
-            >
-              Sourcecode
-              <OpenInNewRoundedIcon />
-            </MenuItem>
-            <ListDivider />
-            <MenuItem>
+
+            <MenuItem onClick={handleLogout}>
               <LogoutRoundedIcon />
               Log out
             </MenuItem>
