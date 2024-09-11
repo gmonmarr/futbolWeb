@@ -32,7 +32,7 @@ export default function Navigation() {
               <ListItemDecorator>
                 <PeopleRoundedIcon fontSize="small" />
               </ListItemDecorator>
-              <ListItemContent>People</ListItemContent>
+              <ListItemContent>Alta/Baja de Jugadores</ListItemContent>
             </ListItemButton>
           </ListItem>
           <ListItem>
@@ -40,7 +40,7 @@ export default function Navigation() {
               <ListItemDecorator sx={{ color: 'neutral.500' }}>
                 <AssignmentIndRoundedIcon fontSize="small" />
               </ListItemDecorator>
-              <ListItemContent>Managing accounts</ListItemContent>
+              <ListItemContent>Rol de Juegos</ListItemContent>
             </ListItemButton>
           </ListItem>
           <ListItem>
@@ -48,7 +48,7 @@ export default function Navigation() {
               <ListItemDecorator sx={{ color: 'neutral.500' }}>
                 <AccountTreeRoundedIcon fontSize="small" />
               </ListItemDecorator>
-              <ListItemContent>Org chart</ListItemContent>
+              <ListItemContent>Tabla de Puntos</ListItemContent>
             </ListItemButton>
           </ListItem>
           <ListItem>
@@ -56,7 +56,7 @@ export default function Navigation() {
               <ListItemDecorator sx={{ color: 'neutral.500' }}>
                 <TodayRoundedIcon fontSize="small" />
               </ListItemDecorator>
-              <ListItemContent>Time off</ListItemContent>
+              <ListItemContent>Capitanes</ListItemContent>
             </ListItemButton>
           </ListItem>
           <ListItem>
