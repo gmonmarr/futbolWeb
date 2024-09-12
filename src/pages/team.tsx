@@ -98,7 +98,8 @@ export default function TeamExample() {
       });
 
       // Update local state to reflect changes
-      setJoinRequests(joinRequests.filter((id) => id !== requestId));
+      setJoinRequests((prevRequests) => prevRequests.filter((id) => id !== requestId));
+      setRequestingUsers((prevUsers) => prevUsers.filter((user) => user.id !== requestId)); // Remove the user from display
     } catch (error) {
       console.error('Error accepting request:', error);
     }
@@ -115,7 +116,8 @@ export default function TeamExample() {
       });
 
       // Update local state to reflect changes
-      setJoinRequests(joinRequests.filter((id) => id !== requestId));
+      setJoinRequests((prevRequests) => prevRequests.filter((id) => id !== requestId));
+      setRequestingUsers((prevUsers) => prevUsers.filter((user) => user.id !== requestId)); // Remove the user from display
     } catch (error) {
       console.error('Error denying request:', error);
     }
