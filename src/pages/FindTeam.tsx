@@ -1,7 +1,7 @@
-// src/pages/FindTeam.tsx
+// src/components_team/Layout.tsx
 
 import * as React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Removed `useLocation`
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
@@ -46,8 +46,7 @@ export default function FindTeam() {
   const [errorMessage, setErrorMessage] = React.useState<string>(''); // Mensajes de error
   const [loading, setLoading] = React.useState(false);
   const [hasAlreadyRequested, setHasAlreadyRequested] = React.useState(false); // Indica si ya solicitó unirse a un equipo
-  const navigate = useNavigate();
-  const location = useLocation(); // Para detectar la ruta actual
+  const navigate = useNavigate(); // Removed `location` declaration
 
   // Obtener el usuario actual
   React.useEffect(() => {
@@ -201,7 +200,7 @@ export default function FindTeam() {
           <Header />
         </Layout.Header>
         <Layout.SideNav>
-          <Navigation currentPath={location.pathname} />
+          <Navigation />
         </Layout.SideNav>
         <Layout.SidePane>
           <Box className="team-header-box">
