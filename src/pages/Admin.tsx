@@ -5,14 +5,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '../firebase';
-import { collection, addDoc, getDocs } from 'firebase/firestore'; // getDocs para obtener equipos
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, getDoc } from 'firebase/firestore';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
-// Definir tipos para equipos y ligas
 interface Team {
   id: string;
   name: string;
@@ -20,11 +18,16 @@ interface Team {
 
 interface League {
   id: string;
-  name: string;
+  leagueName: string;
+}
+
+interface Division {
+  id: string;
+  divisionName: string;
 }
 
 const Admin: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);  // Ahora se usa
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fecha: '',
@@ -33,100 +36,132 @@ const Admin: React.FC = () => {
     equipo2: '',
     cancha: '',
     division: '',
-    semana: '', // Añadir semana en el formulario
-    estado: '', // Añadir estado en el formulario
+    semana: '',
+    estado: '',
   });
-  const [leagues, setLeagues] = useState<League[]>([]);  // Estado para las ligas con tipo
-  const [selectedLeague, setSelectedLeague] = useState('');  // Estado para la liga seleccionada
-  const [teams, setTeams] = useState<Team[]>([]); // Estado para almacenar los equipos con tipo
-  const [selectedEquipo1, setSelectedEquipo1] = useState(''); // Estado para el equipo local
-  const [selectedEquipo2, setSelectedEquipo2] = useState(''); // Estado para el equipo visitante
-  const [selectedHora, setSelectedHora] = useState(''); // Estado para la hora seleccionada
-  const [selectedCancha, setSelectedCancha] = useState(''); // Estado para la cancha seleccionada
-  const [selectedDivision, setSelectedDivision] = useState(''); // Estado para la división seleccionada
-  const [selectedSemana, setSelectedSemana] = useState(''); // Estado para la semana seleccionada
-  const [selectedEstado, setSelectedEstado] = useState(''); // Estado para el estado del partido
+  const [leagues, setLeagues] = useState<League[]>([]);
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedLeague, setSelectedLeague] = useState('');
+  const [selectedDivision, setSelectedDivision] = useState('');
+  const [selectedDivisionName, setSelectedDivisionName] = useState(''); // Store the division name
+  const [selectedEquipo1, setSelectedEquipo1] = useState('');
+  const [selectedEquipo2, setSelectedEquipo2] = useState('');
+  const [selectedHora, setSelectedHora] = useState('');
+  const [selectedCancha, setSelectedCancha] = useState('');
+  const [selectedSemana, setSelectedSemana] = useState('');
+  const [selectedEstado, setSelectedEstado] = useState('');
 
   const navigate = useNavigate();
 
-  // Chequear si el usuario está autenticado y obtener su rol
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        
-        // Obtener el rol del usuario desde Firestore
+
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          console.log('Datos del usuario:', userData);  // Agregando depuración
+          console.log('User data:', userData);
           setUserRole(userData?.role ?? null);
         } else {
-          console.log("No se encontraron datos del usuario.");
+          console.log('No user data found.');
         }
       } else {
         setCurrentUser(null);
-        navigate('/login');  // Redirigir si no está autenticado
+        navigate('/login');
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
-  // Usar currentUser para mostrar detalles del usuario autenticado
   const renderUserDetails = () => {
     if (currentUser) {
-      return (
-        <Typography component="p">
-          Usuario autenticado: {currentUser.email}
-        </Typography>
-      );
+      return <Typography component="p">Authenticated User: {currentUser.email}</Typography>;
     }
     return null;
   };
 
-  // Obtener las ligas de la base de datos
   useEffect(() => {
     const fetchLeagues = async () => {
       try {
-        const leaguesSnapshot = await getDocs(collection(db, 'leagues')); // Obtener ligas de la colección 'leagues'
-        const leaguesData = leaguesSnapshot.docs.map(doc => ({
+        console.log('Fetching leagues...');
+        const leaguesSnapshot = await getDocs(collection(db, 'leagues'));
+        const leaguesData = leaguesSnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
-        })) as League[];
+          leagueName: doc.data().leagueName,
+        }));
+        console.log('Leagues fetched:', leaguesData);
         setLeagues(leaguesData);
       } catch (error) {
-        console.error('Error obteniendo las ligas:', error);
-      }
-    };
-
-    const fetchTeams = async () => {
-      try {
-        const teamsSnapshot = await getDocs(collection(db, 'teams')); // Obtener equipos de la colección 'teams'
-        const teamsData = teamsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Team[];
-        setTeams(teamsData);
-      } catch (error) {
-        console.error('Error obteniendo los equipos:', error);
+        console.error('Error fetching leagues:', error);
       }
     };
 
     fetchLeagues();
-    fetchTeams(); // Llamamos a la función para obtener los equipos al cargar el componente
   }, []);
 
-  // Verificar que el usuario sea admin
+  useEffect(() => {
+    const fetchDivisions = async () => {
+      if (!selectedLeague) return;
+      try {
+        console.log(`Fetching divisions for league: ${selectedLeague}`);
+        const divisionsSnapshot = await getDocs(collection(db, `leagues/${selectedLeague}/divisions`));
+        const divisionsData = divisionsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          divisionName: doc.data().divisionName,
+        }));
+        console.log('Divisions fetched:', divisionsData);
+        setDivisions(divisionsData);
+      } catch (error) {
+        console.error('Error fetching divisions:', error);
+      }
+    };
+
+    fetchDivisions();
+  }, [selectedLeague]);
+
+  useEffect(() => {
+    const fetchTeamsInDivision = async () => {
+      if (!selectedDivision) return;
+
+      try {
+        console.log(`Fetching teams for division: ${selectedDivision}`);
+        const divisionDoc = await getDoc(doc(db, `leagues/${selectedLeague}/divisions`, selectedDivision));
+
+        if (divisionDoc.exists()) {
+          const divisionData = divisionDoc.data();
+          const teamNames = divisionData.teams || [];
+
+          const fetchedTeams = [];
+          for (let teamName of teamNames) {
+            const teamDoc = await getDoc(doc(db, 'teams', teamName));
+            if (teamDoc.exists()) {
+              fetchedTeams.push({ id: teamName, name: teamDoc.data().teamName });
+            }
+          }
+
+          setTeams(fetchedTeams);
+          setSelectedDivisionName(divisionData.divisionName); // Store divisionName
+          console.log('Teams fetched:', fetchedTeams);
+        }
+      } catch (error) {
+        console.error('Error fetching teams:', error);
+      }
+    };
+
+    fetchTeamsInDivision();
+  }, [selectedDivision, selectedLeague]);
+
   useEffect(() => {
     if (userRole && userRole !== 'Admin') {
-      console.log('Rol de usuario:', userRole);  // Agregando depuración
-      alert('Acceso denegado. Solo los administradores pueden acceder a esta página.');
-      navigate('/'); // Redirige a la página de inicio si no es admin
+      console.log('User role:', userRole);
+      alert('Access denied. Only administrators can access this page.');
+      navigate('/');
     }
   }, [userRole, navigate]);
 
-  // Manejar el cambio en el formulario
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -134,38 +169,37 @@ const Admin: React.FC = () => {
     });
   };
 
-  // Agregar partido a la base de datos
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedLeague || !selectedEquipo1 || !selectedEquipo2 || !selectedHora || !selectedCancha || !selectedDivision || !selectedSemana || !selectedEstado) {
-      alert('Por favor selecciona una liga, una hora, una cancha, una división, una semana, el estado del partido y ambos equipos.');
+      alert('Please select all required fields.');
       return;
     }
     try {
       await addDoc(collection(db, 'partidos'), {
         fecha: formData.fecha,
-        hora: selectedHora, // Utiliza la hora seleccionada
+        hora: selectedHora,
         equipo1: selectedEquipo1,
         equipo2: selectedEquipo2,
-        cancha: selectedCancha, // Utiliza la cancha seleccionada
-        division: selectedDivision, // Utiliza la división seleccionada
-        liga: selectedLeague,  // Añadir la liga seleccionada
-        semana: selectedSemana, // Añadir la semana seleccionada
-        estado: selectedEstado, // Añadir el estado del partido
+        cancha: selectedCancha,
+        division: selectedDivisionName, // Use the division name here
+        liga: selectedLeague,
+        semana: selectedSemana,
+        estado: selectedEstado,
       });
-      alert('Partido agregado con éxito.');
-      setFormData({ fecha: '', hora: '', equipo1: '', equipo2: '', cancha: '', division: '', semana: '', estado: '' }); // Resetear el formulario
-      setSelectedLeague(''); // Resetear la liga seleccionada
-      setSelectedEquipo1(''); // Resetear el equipo local
-      setSelectedEquipo2(''); // Resetear el equipo visitante
-      setSelectedHora(''); // Resetear la hora seleccionada
-      setSelectedCancha(''); // Resetear la cancha seleccionada
-      setSelectedDivision(''); // Resetear la división seleccionada
-      setSelectedSemana(''); // Resetear la semana seleccionada
-      setSelectedEstado(''); // Resetear el estado del partido
+      alert('Match added successfully.');
+      setFormData({ fecha: '', hora: '', equipo1: '', equipo2: '', cancha: '', division: '', semana: '', estado: '' });
+      setSelectedLeague('');
+      setSelectedEquipo1('');
+      setSelectedEquipo2('');
+      setSelectedHora('');
+      setSelectedCancha('');
+      setSelectedDivision('');
+      setSelectedSemana('');
+      setSelectedEstado('');
     } catch (error) {
-      console.error('Error agregando partido:', error);
-      alert('Error agregando partido. Intenta de nuevo.');
+      console.error('Error adding match:', error);
+      alert('Error adding match. Please try again.');
     }
   };
 
@@ -174,16 +208,16 @@ const Admin: React.FC = () => {
       {userRole === 'Admin' && (
         <>
           <Typography component="h1" level="h4" gutterBottom>
-            Administrador - Agregar Partido
+            Admin - Add Match
           </Typography>
           
-          {/* Render user details */}
           {renderUserDetails()}
 
           <form onSubmit={handleSubmit}>
+            {/* Date */}
             <Box sx={{ marginBottom: 2 }}>
               <TextField
-                label="Fecha"
+                label="Date"
                 name="fecha"
                 value={formData.fecha}
                 onChange={handleChange}
@@ -192,16 +226,16 @@ const Admin: React.FC = () => {
               />
             </Box>
 
-            {/* Dropdown para seleccionar la hora */}
+            {/* Time */}
             <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Selecciona la Hora:</Typography>
+              <Typography component="p">Select Time:</Typography>
               <select
                 value={selectedHora}
                 onChange={(e) => setSelectedHora(e.target.value)}
                 required
                 style={{ width: '100%', padding: '8px', marginTop: '10px' }}
               >
-                <option value="">Seleccione una hora</option>
+                <option value="">Select Time</option>
                 <option value="17:30">17:30</option>
                 <option value="18:30">18:30</option>
                 <option value="19:30">19:30</option>
@@ -209,125 +243,137 @@ const Admin: React.FC = () => {
               </select>
             </Box>
 
-            {/* Dropdown para seleccionar equipos */}
+            {/* League */}
             <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Selecciona el Equipo Local:</Typography>
+              <Typography component="p">Select League:</Typography>
               <select
-                value={selectedEquipo1}
-                onChange={(e) => setSelectedEquipo1(e.target.value)}
+                value={selectedLeague}
+                onChange={(e) => {
+                  setSelectedLeague(e.target.value);
+                  setSelectedDivision(''); 
+                  setDivisions([]); 
+                  setTeams([]); 
+                }}
                 required
                 style={{ width: '100%', padding: '8px', marginTop: '10px' }}
               >
-                <option value="">Seleccione un equipo</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name ? team.name : "Equipo sin nombre"} {/* Verificación del campo 'name' */}
+                <option value="">Select a League</option>
+                {leagues.map((league) => (
+                  <option key={league.id} value={league.id}>
+                    {league.leagueName}
                   </option>
                 ))}
               </select>
             </Box>
 
+            {/* Division */}
             <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Selecciona el Equipo Visitante:</Typography>
-              <select
-                value={selectedEquipo2}
-                onChange={(e) => setSelectedEquipo2(e.target.value)}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Seleccione un equipo</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name ? team.name : "Equipo sin nombre"} {/* Verificación del campo 'name' */}
-                  </option>
-                ))}
-              </select>
-            </Box>
-
-            {/* Dropdown para seleccionar cancha */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Selecciona la Cancha:</Typography>
-              <select
-                value={selectedCancha}
-                onChange={(e) => setSelectedCancha(e.target.value)}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Seleccione una cancha</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-              </select>
-            </Box>
-
-            {/* Dropdown para seleccionar división */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Selecciona la División:</Typography>
+              <Typography component="p">Select Division:</Typography>
               <select
                 value={selectedDivision}
                 onChange={(e) => setSelectedDivision(e.target.value)}
                 required
                 style={{ width: '100%', padding: '8px', marginTop: '10px' }}
               >
-                <option value="">Seleccione una división</option>
-                <option value="Varonil 1 Fuerza">Varonil 1 Fuerza</option>
-                <option value="Varonil 2 Fuerza">Varonil 2 Fuerza</option>
-                <option value="Feminil Unica">Feminil Unica</option>
+                <option value="">Select a Division</option>
+                {divisions.map((division) => (
+                  <option key={division.id} value={division.id}>
+                    {division.divisionName}
+                  </option>
+                ))}
               </select>
             </Box>
 
-            {/* Dropdown para seleccionar semana */}
+            {/* Home Team */}
             <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Selecciona la Semana:</Typography>
+              <Typography component="p">Select Home Team:</Typography>
+              <select
+                value={selectedEquipo1}
+                onChange={(e) => setSelectedEquipo1(e.target.value)}
+                required
+                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+              >
+                <option value="">Select a team</option>
+                {teams
+                  .filter((team) => team.id !== selectedEquipo2) // Exclude the away team
+                  .map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
+                  ))}
+              </select>
+            </Box>
+
+            {/* Away Team */}
+            <Box sx={{ marginBottom: 2 }}>
+              <Typography component="p">Select Away Team:</Typography>
+              <select
+                value={selectedEquipo2}
+                onChange={(e) => setSelectedEquipo2(e.target.value)}
+                required
+                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+              >
+                <option value="">Select a team</option>
+                {teams
+                  .filter((team) => team.id !== selectedEquipo1) // Exclude the home team
+                  .map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
+                  ))}
+              </select>
+            </Box>
+
+            {/* Field */}
+            <Box sx={{ marginBottom: 2 }}>
+              <Typography component="p">Select Field:</Typography>
+              <select
+                value={selectedCancha}
+                onChange={(e) => setSelectedCancha(e.target.value)}
+                required
+                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+              >
+                <option value="">Select Field</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </Box>
+
+            {/* Week */}
+            <Box sx={{ marginBottom: 2 }}>
+              <Typography component="p">Select Week:</Typography>
               <select
                 value={selectedSemana}
                 onChange={(e) => setSelectedSemana(e.target.value)}
                 required
                 style={{ width: '100%', padding: '8px', marginTop: '10px' }}
               >
-                <option value="">Seleccione una semana</option>
+                <option value="">Select Week</option>
                 {Array.from({ length: 18 }, (_, i) => (
-                  <option key={i + 1} value={`Semana ${i + 1}`}>{`Semana ${i + 1}`}</option>
+                  <option key={i + 1} value={`Week ${i + 1}`}>{`Week ${i + 1}`}</option>
                 ))}
               </select>
             </Box>
 
-            {/* Dropdown para seleccionar el estado del partido */}
+            {/* Match Status */}
             <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Selecciona el Estado del Partido:</Typography>
+              <Typography component="p">Select Match Status:</Typography>
               <select
                 value={selectedEstado}
                 onChange={(e) => setSelectedEstado(e.target.value)}
                 required
                 style={{ width: '100%', padding: '8px', marginTop: '10px' }}
               >
-                <option value="">Seleccione un estado</option>
-                <option value="Jugado">Jugado</option>
-                <option value="Cancelado">Cancelado</option>
-                <option value="Reprogramado">Reprogramado</option>
-                <option value="Por Jugar">Por Jugar</option>
-              </select>
-            </Box>
-
-            {/* Dropdown para seleccionar una liga */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Selecciona una liga:</Typography>
-              <select
-                value={selectedLeague}
-                onChange={(e) => setSelectedLeague(e.target.value)}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Seleccione una liga</option>
-                {leagues.map((league) => (
-                  <option key={league.id} value={league.id}>
-                    {league.name ? league.name : "Liga sin nombre"} {/* Verificación del campo 'name' */}
-                  </option>
-                ))}
+                <option value="">Select Status</option>
+                <option value="Played">Played</option>
+                <option value="Canceled">Canceled</option>
+                <option value="Rescheduled">Rescheduled</option>
+                <option value="To Be Played">To Be Played</option>
               </select>
             </Box>
 
             <Button variant="contained" color="primary" type="submit">
-              Agregar Partido
+              Add Match
             </Button>
           </form>
         </>
