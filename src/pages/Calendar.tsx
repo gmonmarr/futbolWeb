@@ -21,7 +21,6 @@ import ModalClose from '@mui/joy/ModalClose';
 import DialogTitle from '@mui/joy/DialogTitle';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
-import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
@@ -70,7 +69,7 @@ const FixedSizeGrid = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       {/* Header component */}
-      <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', flexGrow: 0, justifyContent: 'space-between', padding: 2 }}>
         <Stack
           direction="row"
           spacing={1}
@@ -262,11 +261,11 @@ const FixedSizeGrid = () => {
       </Box>
 
       {/* Calendar DataGrid */}
-      <div style={{ width: '100%', padding: '16px' }}>
-        <div style={{ height: 350, width: '100%' }}>
+      <Box sx={{ width: '100%', padding: '16px', flexGrow: 1 }}>
+        <Box sx={{ height: 350, width: '100%' }}>
           <DataGrid {...data} />
-        </div>
-      </div>
+        </Box>
+      </Box>
     </Box>
   );
 };
