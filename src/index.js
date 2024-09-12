@@ -8,6 +8,7 @@ import Team from './pages/team.tsx';
 import CreateTeam from './pages/CreateTeam.tsx'; // Import the CreateTeam page
 import FindTeam from './pages/FindTeam.tsx'; // Import the FindTeam page
 import Admin from './pages/Admin.tsx'; // Import the Admin page
+import Capitanes from './pages/Capitanes.tsx';
 import ProtectedRoute from './ProtectedRoute'; // Import the ProtectedRoute component
 import reportWebVitals from './reportWebVitals';
 
@@ -19,10 +20,13 @@ root.render(
       <Routes>
         <Route path="/" element={<Navigate to="/calendar" />} />
         <Route path="/calendar" element={<Calendar />} />
-        <Route path="/login" element={<Login />} />
         <Route path="/team" element={<Team />} />
+        <Route path="/login" element={<Login />} />
+
         <Route path="/create-team" element={<CreateTeam />} /> {/* Add new route */}
         <Route path="/find-team" element={<FindTeam />} /> {/* Add FindTeam route */}
+        <Route path="/capitanes" element={<Capitanes />} /> {/* Add FindTeam route */}
+        
         
         {/* Protected route for Admin */}
         <Route path="/admin" element={
@@ -30,8 +34,8 @@ root.render(
             <Admin />
           </ProtectedRoute>
         } />
-
         <Route path="*" element={<Navigate to="/login" />} />
+
       </Routes>
     </Router>
   </React.StrictMode>

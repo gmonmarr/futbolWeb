@@ -1,7 +1,6 @@
 // src/components_team/Header.tsx
 
 import * as React from 'react';
-import { useColorScheme } from '@mui/joy/styles';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import IconButton from '@mui/joy/IconButton';
@@ -38,38 +37,7 @@ interface UserData {
   email: string;
 }
 
-function ColorSchemeToggle() {
-  const { mode, setMode } = useColorScheme();
-  const [mounted, setMounted] = React.useState(false);
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return <IconButton size="sm" variant="outlined" color="primary" />;
-  }
-
-  return (
-    <Tooltip title="Change theme" variant="outlined">
-      <IconButton
-        size="sm"
-        variant="plain"
-        color="neutral"
-        sx={{ alignSelf: 'center' }}
-        onClick={() => {
-          if (mode === 'light') {
-            setMode('dark');
-          } else {
-            setMode('light');
-          }
-        }}
-      >
-        {mode === 'light' ? <DarkModeRoundedIcon /> : <LightModeRoundedIcon />}
-      </IconButton>
-    </Tooltip>
-  );
-}
 
 export default function Header() {
   const [open, setOpen] = React.useState(false);
@@ -111,14 +79,6 @@ export default function Header() {
           display: { xs: 'none', sm: 'flex' },
         }}
       >
-        <IconButton
-          size="md"
-          variant="outlined"
-          color="neutral"
-          sx={{ display: { xs: 'none', sm: 'inline-flex' }, borderRadius: '50%' }}
-        >
-          <LanguageRoundedIcon />
-        </IconButton>
         <Button
           variant="plain"
           color="neutral"
@@ -177,30 +137,6 @@ export default function Header() {
           alignItems: 'center',
         }}
       >
-        <Input
-          size="sm"
-          variant="outlined"
-          placeholder="Search anything…"
-          startDecorator={<SearchRoundedIcon color="primary" />}
-          endDecorator={
-            <IconButton
-              variant="outlined"
-              color="neutral"
-              sx={{ bgcolor: 'background.level1' }}
-            >
-              <Typography level="title-sm" textColor="text.icon">
-                ⌘ K
-              </Typography>
-            </IconButton>
-          }
-          sx={{
-            alignSelf: 'center',
-            display: {
-              xs: 'none',
-              sm: 'flex',
-            },
-          }}
-        />
 
         <IconButton
           size="sm"
@@ -210,9 +146,7 @@ export default function Header() {
         >
           <SearchRoundedIcon />
         </IconButton>
-
-        <ColorSchemeToggle />
-
+        
         <Dropdown>
           <MenuButton
             variant="plain"

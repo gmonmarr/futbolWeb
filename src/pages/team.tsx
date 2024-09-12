@@ -139,84 +139,88 @@ export default function TeamExample() {
           <Navigation />
         </Layout.SideNav>
         <Layout.SidePane>
+          {/* Show the user details */}
+          <Box sx={{ backgroundColor: '#f0f4f8', padding: '16px', borderRadius: '8px', 
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',  marginBottom: '24px' }}>
+              <Typography level="h1" textColor="text.primary" component="h1">
+                {userData ? `Welcome, ${userData.name || 'User'}` : 'Loading...'}
+              </Typography>
+          </Box>
+
+                
           <Box className="team-header-box">
             {currentUser ? (
               <>
-                {/* Show the user details */}
-                <Typography level="title-lg" textColor="text.secondary" component="h1">
-                  {userData ? `Welcome, ${userData.name || 'User'}` : 'Loading...'}
+          <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+
+            {/* Left side - Teams */}
+            <Box sx={{ width: '30%', paddingLeft: '32px' }}>
+              <Typography level="title-md" textColor="text.secondary" component="p">
+                Teams You Lead:
+              </Typography>
+
+              {teams.length > 0 ? (
+                teams.map((team) => (
+                  <Box key={team.id} sx={{ mt: 2, textAlign: 'left' }}>
+                    <Typography level="body-md" component="p">
+                      Team: {team.teamName}
+                    </Typography>
+                    <Button
+                      variant="solid"
+                      size="sm"
+                      sx={{ mt: 1 }}
+                      onClick={() => handleTeamSelect(team)}
+                    >
+                      {selectedTeamId === team.id ? 'Hide Join Requests' : 'View Join Requests'}
+                    </Button>
+                  </Box>
+                ))
+              ) : (
+                <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
+                  You are not the leader of any teams.
+                </Typography>
+              )}
+          </Box>
+
+          {/* Right side - Join Requests */}
+          <Box sx={{ width: '50%', paddingLeft: '32px' }}>
+            {selectedTeamId && joinRequests.length > 0 && (
+              <Box sx={{ textAlign: 'left' }}>
+                <Typography level="title-md" textColor="text.secondary" component="p">
+                  Join Requests:
                 </Typography>
 
-                {/* Display teams the user is the leader of */}
-                <Box sx={{ mt: 3, width: '100%', textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
-                  <Typography level="title-md" textColor="text.secondary" component="p">
-                    Teams You Lead:
-                  </Typography>
-
-                  {teams.length > 0 ? (
-                    teams.map((team) => (
-                      <Box key={team.id} sx={{ mt: 2, textAlign: 'left' }}>
-                        <Typography level="body-md" component="p">
-                          Team: {team.teamName}
-                        </Typography>
-                        <Button
-                          variant="solid" // Cambiado a 'solid' en lugar de 'contained'
-                          size="sm"
-                          sx={{ mt: 1 }}
-                          onClick={() => handleTeamSelect(team)}
-                        >
-                          {selectedTeamId === team.id ? 'Hide Join Requests' : 'View Join Requests'}
-                        </Button>
-                      </Box>
-                    ))
-                  ) : (
-                    <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
-                      You are not the leader of any teams.
-                    </Typography>
-                  )}
-
-                  {/* Display join requests for the selected team */}
-                  {selectedTeamId && joinRequests.length > 0 && (
-                    <Box sx={{ mt: 3, textAlign: 'left' }}>
-                      <Typography level="title-md" textColor="text.secondary" component="p">
-                        Join Requests:
+                {requestingUsers.length > 0 ? (
+                  requestingUsers.map((user) => (
+                    <Box key={user.id} sx={{ mt: 1 }}>
+                      <Typography level="body-md" component="p">
+                        Request from: {user.name}
                       </Typography>
-
-                      {requestingUsers.length > 0 ? (
-                        requestingUsers.map((user) => (
-                          <Box key={user.id} sx={{ mt: 2 }}>
-                            <Typography level="body-md" component="p">
-                              Request from: {user.name}
-                            </Typography>
-                            <Button
-                              variant="solid" // Cambiado a 'solid' en lugar de 'contained'
-                              size="sm"
-                              sx={{ mt: 1, mr: 1 }}
-                              onClick={() => handleAcceptRequest(selectedTeamId, user.id)}
-                            >
-                              Accept
-                            </Button>
-                            <Button
-                              variant="outlined" // No cambio, 'outlined' es válido
-                              size="sm"
-                              sx={{ mt: 1 }}
-                              onClick={() => handleDenyRequest(selectedTeamId, user.id)}
-                            >
-                              Deny
-                            </Button>
-                          </Box>
-                        ))
-                      ) : (
-                        <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
-                          No join requests.
-                        </Typography>
-                      )}
+                      <Button variant="solid" size="sm" sx={{ mt: 1, mr: 1 }} onClick={() => handleAcceptRequest(selectedTeamId, user.id)}>
+                        Accept
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="sm"
+                        sx={{ mb: 2 }}
+                        onClick={() => handleDenyRequest(selectedTeamId, user.id)}
+                      >
+                        Deny
+                      </Button>
                     </Box>
-                  )}
-                </Box>
+                  ))
+                ) : (
+                  <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
+                    No join requests.
+                  </Typography>
+                )}
+              </Box>
+            )}
+          </Box>
+      </Box>
 
-                
               </>
+
             ) : (
               <Typography level="title-lg" textColor="text.secondary" component="h1">
                 No user logged in. Please log in to view your data.
