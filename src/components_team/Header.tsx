@@ -94,7 +94,7 @@ export default function Header() {
           color="neutral"
           aria-pressed="true"
           component="a"
-          href="/joy-ui/getting-started/templates/team/"
+          href="./team"
           size="sm"
           sx={{ alignSelf: 'center' }}
         >

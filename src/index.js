@@ -22,10 +22,9 @@ root.render(
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/team" element={<Team />} />
         <Route path="/login" element={<Login />} />
-
-        <Route path="/create-team" element={<CreateTeam />} /> {/* Add new route */}
-        <Route path="/find-team" element={<FindTeam />} /> {/* Add FindTeam route */}
-        <Route path="/capitanes" element={<Capitanes />} /> {/* Add FindTeam route */}
+        <Route path="/create-team" element={<CreateTeam />} />
+        <Route path="/find-team" element={<FindTeam />} />
+        <Route path="/capitanes" element={<Capitanes />} />
         
         
         {/* Protected route for Admin */}
