@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
@@ -19,7 +19,7 @@ import { collection, query, where, getDocs, doc, getDoc, updateDoc, arrayRemove,
 
 export default function TeamExample() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [currentUser, setCurrentUser] = React.useState<User | null>(null);
   const [userData, setUserData] = React.useState<any>(null); // User-specific data
   const [teams, setTeams] = React.useState<any[]>([]); // Teams where the user is the leader
@@ -160,7 +160,7 @@ export default function TeamExample() {
                           Team: {team.teamName}
                         </Typography>
                         <Button
-                          variant="contained"
+                          variant="solid" // Cambiado a 'solid' en lugar de 'contained'
                           size="sm"
                           sx={{ mt: 1 }}
                           onClick={() => handleTeamSelect(team)}
@@ -189,7 +189,7 @@ export default function TeamExample() {
                               Request from: {user.name}
                             </Typography>
                             <Button
-                              variant="contained"
+                              variant="solid" // Cambiado a 'solid' en lugar de 'contained'
                               size="sm"
                               sx={{ mt: 1, mr: 1 }}
                               onClick={() => handleAcceptRequest(selectedTeamId, user.id)}
@@ -197,7 +197,7 @@ export default function TeamExample() {
                               Accept
                             </Button>
                             <Button
-                              variant="outlined"
+                              variant="outlined" // No cambio, 'outlined' es válido
                               size="sm"
                               sx={{ mt: 1 }}
                               onClick={() => handleDenyRequest(selectedTeamId, user.id)}

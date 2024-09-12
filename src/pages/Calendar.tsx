@@ -205,16 +205,12 @@ const FixedSizeGrid = () => {
 
       {/* Calendar DataGrid */}
       <Box sx={{ width: '100%', padding: '16px', flexGrow: 1 }}>
-        <Box sx={{ height: 600, width: '100%' }}>
+        <Box sx={{ height: 600, width: '98%' }}>
           <DataGrid 
             rows={rows} 
             columns={columns} 
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: 5 },
-              },
-            }} 
-            pageSizeOptions={[5]} 
+            autoHeight // Ajusta automáticamente la altura del grid basado en las filas
+            sx={{ overflowY: 'auto' }} // Scroll vertical para ver todos los partidos
           />
         </Box>
       </Box>
