@@ -1,7 +1,7 @@
 // src/pages/login.js
 
 import React, { useState, useEffect } from "react";
-import { auth, googleProvider, db, doc, setDoc, getDoc } from "../firebase";
+import { auth, googleProvider, db, doc, setDoc, getDoc, updateDoc } from "../firebase";
 import {
   signInWithPopup,
   createUserWithEmailAndPassword,
