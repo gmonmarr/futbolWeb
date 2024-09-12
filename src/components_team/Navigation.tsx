@@ -8,14 +8,19 @@ import ListItem from '@mui/joy/ListItem';
 import ListItemButton from '@mui/joy/ListItemButton';
 import ListItemDecorator from '@mui/joy/ListItemDecorator';
 import ListItemContent from '@mui/joy/ListItemContent';
-
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
 import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded';
 import TodayRoundedIcon from '@mui/icons-material/TodayRounded';
+import GroupAddRoundedIcon from '@mui/icons-material/GroupAddRounded'; // Icon for Create Team
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded'; // Icon for Find Team
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navigation() {
+  const navigate = useNavigate();
+  const location = useLocation(); // Get the current path using useLocation
+
   return (
     <List
       size="sm"
@@ -30,7 +35,7 @@ export default function Navigation() {
           sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
         >
           <ListItem>
-            <ListItemButton selected>
+            <ListItemButton selected={location.pathname === '/team'} onClick={() => navigate('/team')}>
               <ListItemDecorator>
                 <PeopleRoundedIcon fontSize="small" />
               </ListItemDecorator>
@@ -38,7 +43,7 @@ export default function Navigation() {
             </ListItemButton>
           </ListItem>
           <ListItem>
-            <ListItemButton>
+            <ListItemButton selected={location.pathname === '/rol-juegos'} onClick={() => navigate('/rol-juegos')}>
               <ListItemDecorator sx={{ color: 'neutral.500' }}>
                 <AssignmentIndRoundedIcon fontSize="small" />
               </ListItemDecorator>
@@ -46,7 +51,7 @@ export default function Navigation() {
             </ListItemButton>
           </ListItem>
           <ListItem>
-            <ListItemButton>
+            <ListItemButton selected={location.pathname === '/tabla-puntos'} onClick={() => navigate('/tabla-puntos')}>
               <ListItemDecorator sx={{ color: 'neutral.500' }}>
                 <AccountTreeRoundedIcon fontSize="small" />
               </ListItemDecorator>
@@ -54,7 +59,7 @@ export default function Navigation() {
             </ListItemButton>
           </ListItem>
           <ListItem>
-            <ListItemButton>
+            <ListItemButton selected={location.pathname === '/capitanes'} onClick={() => navigate('/capitanes')}>
               <ListItemDecorator sx={{ color: 'neutral.500' }}>
                 <TodayRoundedIcon fontSize="small" />
               </ListItemDecorator>
@@ -62,7 +67,7 @@ export default function Navigation() {
             </ListItemButton>
           </ListItem>
           <ListItem>
-            <ListItemButton>
+            <ListItemButton selected={location.pathname === '/policies'} onClick={() => navigate('/policies')}>
               <ListItemDecorator sx={{ color: 'neutral.500' }}>
                 <ArticleRoundedIcon fontSize="small" />
               </ListItemDecorator>
@@ -70,6 +75,34 @@ export default function Navigation() {
               <Chip variant="soft" color="warning" size="sm">
                 2
               </Chip>
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </ListItem>
+
+      <ListItem nested>
+        <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>
+          Manage Teams
+        </ListSubheader>
+        <List
+          aria-labelledby="nav-list-manage-teams"
+          sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
+        >
+          <ListItem>
+            <ListItemButton selected={location.pathname === '/create-team'} onClick={() => navigate('/create-team')}>
+              <ListItemDecorator>
+                <GroupAddRoundedIcon fontSize="small" />
+              </ListItemDecorator>
+              <ListItemContent>Create Team</ListItemContent>
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem>
+            <ListItemButton selected={location.pathname === '/find-team'} onClick={() => navigate('/find-team')}>
+              <ListItemDecorator>
+                <SearchRoundedIcon fontSize="small" />
+              </ListItemDecorator>
+              <ListItemContent>Find Team</ListItemContent>
             </ListItemButton>
           </ListItem>
         </List>

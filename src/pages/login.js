@@ -68,7 +68,7 @@ function Login() {
         role: "Player", // Default role as Player
       });
 
-      navigate("/team"); // Redirect after registration
+      navigate("/create-team"); // Redirect to create team after registration
     } catch (error) {
       setError(error.message);
     }
@@ -89,7 +89,7 @@ function Login() {
         setIsProfileComplete(false); // Show form to complete profile
       } else {
         setIsProfileComplete(true);
-        navigate("/team"); // Redirect if profile is complete
+        navigate("/create-team"); // Redirect to create team after Google login
       }
     } catch (error) {
       setError(error.message);
@@ -108,7 +108,7 @@ function Login() {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         if (userData.matriculaTEC) {
-          navigate("/team"); // Redirect if profile is complete
+          navigate("/create-team"); // Redirect to create team after login
         } else {
           setIsProfileComplete(false); // Show form to complete profile
         }
