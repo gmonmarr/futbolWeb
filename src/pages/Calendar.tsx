@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
+import { getDoc, doc } from 'firebase/firestore';
 
 const FixedSizeGrid = () => {
   const [open, setOpen] = React.useState(false);
