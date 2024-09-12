@@ -2,7 +2,6 @@ import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
-import IconButton from '@mui/joy/IconButton';
 import Stack from '@mui/joy/Stack';
 import Avatar from '@mui/joy/Avatar';
 import Button from '@mui/joy/Button';
@@ -206,7 +205,7 @@ const FixedSizeGrid = () => {
 
       {/* Calendar DataGrid */}
       <Box sx={{ width: '100%', padding: '16px', flexGrow: 1 }}>
-        <Box sx={{ height: 350, width: '100%' }}>
+        <Box sx={{ height: 600, width: '100%' }}>
           <DataGrid rows={rows} columns={columns} pageSize={5} rowsPerPageOptions={[5]} />
         </Box>
       </Box>
