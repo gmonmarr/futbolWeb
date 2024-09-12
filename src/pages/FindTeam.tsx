@@ -1,3 +1,5 @@
+// src/pages/FindTeam.tsx
+
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CssBaseline, Box, Typography, Button, Grid, Card, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, Alert } from '@mui/material'; // Cambiado a Material UI
