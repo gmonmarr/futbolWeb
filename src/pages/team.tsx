@@ -214,44 +214,8 @@ export default function TeamExample() {
     </Box>
   )}
 </Box>
-                {/* Display join requests for the selected team */}
-                {selectedTeamId && joinRequests.length > 0 && (
-                  <Box sx={{ mt: 3 }}>
-                    <Typography level="title-md" textColor="text.secondary" component="p">
-                      Join Requests:
-                    </Typography>
 
-                    {requestingUsers.length > 0 ? (
-                      requestingUsers.map((user) => (
-                        <Box key={user.id} sx={{ mt: 2 }}>
-                          <Typography level="body-md" component="p">
-                            Request from: {user.name}
-                          </Typography>
-                          <Button
-                            variant="contained"
-                            size="sm"
-                            sx={{ mt: 1, mr: 1 }}
-                            onClick={() => handleAcceptRequest(selectedTeamId, user.id)}
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            size="sm"
-                            sx={{ mt: 1 }}
-                            onClick={() => handleDenyRequest(selectedTeamId, user.id)}
-                          >
-                            Deny
-                          </Button>
-                        </Box>
-                      ))
-                    ) : (
-                      <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
-                        No join requests.
-                      </Typography>
-                    )}
-                  </Box>
-                )}
+                
               </>
             ) : (
               <Typography level="title-lg" textColor="text.secondary" component="h1">
