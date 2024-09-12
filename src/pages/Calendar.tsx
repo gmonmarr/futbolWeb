@@ -1,3 +1,5 @@
+// src/pages/Calendar.tsx
+
 import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/joy/Box';
@@ -5,7 +7,6 @@ import Typography from '@mui/joy/Typography';
 import Stack from '@mui/joy/Stack';
 import Avatar from '@mui/joy/Avatar';
 import Button from '@mui/joy/Button';
-import Tooltip from '@mui/joy/Tooltip';
 import Dropdown from '@mui/joy/Dropdown';
 import Menu from '@mui/joy/Menu';
 import MenuButton from '@mui/joy/MenuButton';
@@ -14,21 +15,30 @@ import ListDivider from '@mui/joy/ListDivider';
 import Drawer from '@mui/joy/Drawer';
 import ModalClose from '@mui/joy/ModalClose';
 import DialogTitle from '@mui/joy/DialogTitle';
-import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import { useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { getDoc, doc } from 'firebase/firestore';
 
+// Define un tipo para las filas
+interface Partido {
+  id: string;
+  fecha: string;
+  hora: string;
+  equipo1: string;
+  equipo2: string;
+  cancha: string;
+  division: string;
+}
+
 const FixedSizeGrid = () => {
   const [open, setOpen] = React.useState(false);
   const [userData, setUserData] = React.useState<{ name: string; email: string } | null>(null);
-  const [rows, setRows] = React.useState([]); // State to store rows from Firestore
+  const [rows, setRows] = React.useState<Partido[]>([]); // Estado con el tipo Partido
   const navigate = useNavigate();
 
   // Fetch user data from Firestore
@@ -53,7 +63,7 @@ const FixedSizeGrid = () => {
         id: doc.id,
         ...doc.data(),
       }));
-      setRows(partidosData); // Set the rows with data from Firestore
+      setRows(partidosData as Partido[]); // Asegurarse de que los datos sean del tipo Partido
     };
 
     fetchData();
@@ -111,16 +121,6 @@ const FixedSizeGrid = () => {
             sx={{ alignSelf: 'center' }}
           >
             Equipos
-          </Button>
-          <Button
-            variant="plain"
-            color="neutral"
-            component="a"
-            href="/joy-ui/getting-started/templates/files/"
-            size="sm"
-            sx={{ alignSelf: 'center' }}
-          >
-            ???
           </Button>
         </Stack>
 
@@ -206,7 +206,16 @@ const FixedSizeGrid = () => {
       {/* Calendar DataGrid */}
       <Box sx={{ width: '100%', padding: '16px', flexGrow: 1 }}>
         <Box sx={{ height: 600, width: '100%' }}>
-          <DataGrid rows={rows} columns={columns} pageSize={5} rowsPerPageOptions={[5]} />
+          <DataGrid 
+            rows={rows} 
+            columns={columns} 
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 5 },
+              },
+            }} 
+            pageSizeOptions={[5]} 
+          />
         </Box>
       </Box>
     </Box>
