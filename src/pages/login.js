@@ -1,7 +1,7 @@
 // src/pages/login.js
 
 import React, { useState, useEffect } from "react";
-import { auth, googleProvider, db, doc, setDoc, getDoc, updateDoc } from "../firebase";
+import { auth, googleProvider, db, doc, setDoc, getDoc } from "../firebase";
 import {
   signInWithPopup,
   createUserWithEmailAndPassword,
@@ -48,7 +48,6 @@ function Login() {
     });
     return () => unsubscribe();
   }, [navigate]);
-  
 
   // Register user
   const handleRegister = async (e) => {
@@ -103,33 +102,33 @@ function Login() {
   };
 
   // Handle login
-const handleLogin = async (e) => {
-  e.preventDefault();
-  try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    setUser(result.user);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      setUser(result.user);
 
-    // Verifica si el usuario existe y si ha completado el perfil
-    const userDoc = await getDoc(doc(db, "users", result.user.uid));
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      if (userData.matriculaTEC) {
-        // Redirige a la página de administración si el usuario es un admin
-        if (userData.role === 'Admin') {
-          navigate("/admin");
+      // Verifica si el usuario existe y si ha completado el perfil
+      const userDoc = await getDoc(doc(db, "users", result.user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.matriculaTEC) {
+          // Redirige a la página de administración si el usuario es un admin
+          if (userData.role === 'Admin') {
+            navigate("/admin");
+          } else {
+            navigate("/create-team"); // Redirige a la creación de equipo si no es admin
+          }
         } else {
-          navigate("/create-team"); // Redirige a la creación de equipo si no es admin
+          setIsProfileComplete(false); // Muestra el formulario para completar el perfil
         }
       } else {
-        setIsProfileComplete(false); // Muestra el formulario para completar el perfil
+        setError("User data not found");
       }
-    } else {
-      setError("User data not found");
+    } catch (error) {
+      setError(error.message);
     }
-  } catch (error) {
-    setError(error.message);
-  }
-};
+  };
 
 
   return (
@@ -187,9 +186,9 @@ const handleLogin = async (e) => {
 
             <p>
               {newUser ? "Already have an account?" : "Don’t have an account?"}
-              <a href="#" onClick={() => setNewUser(!newUser)}>
+              <button type="button" onClick={() => setNewUser(!newUser)}>
                 {newUser ? "Login" : "Register"}
-              </a>
+              </button>
             </p>
 
             {error && <p style={{ color: "red" }}>{error}</p>}

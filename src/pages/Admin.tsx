@@ -134,7 +134,7 @@ const Admin: React.FC = () => {
           const divisionData = divisionDoc.data();
           const teamNames = divisionData.teams || [];
 
-          const fetchedTeams = [];
+          const fetchedTeams: Team[] = []; // Explicitly define the type as Team[]
           for (let teamName of teamNames) {
             const teamDoc = await getDoc(doc(db, 'teams', teamName));
             if (teamDoc.exists()) {
@@ -336,6 +336,8 @@ const Admin: React.FC = () => {
                 <option value="">Select Field</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
+                <option value="2">3</option>
+                <option value="2">4</option>
               </select>
             </Box>
 

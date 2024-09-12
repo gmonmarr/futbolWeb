@@ -12,36 +12,47 @@ import Header from '../components_team/Header.tsx';
 import Navigation from '../components_team/Navigation.tsx';
 import './team.css';
 import { auth, db } from '../firebase';
-import { doc, setDoc, updateDoc, collection, getDocs, arrayUnion, getDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, collection, getDocs, arrayUnion } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
+
+// Define los tipos para las ligas y divisiones
+interface League {
+  id: string;
+  name: string;
+}
+
+interface Division {
+  id: string;
+  name: string;
+}
 
 export default function CreateTeam() {
   const [currentUser, setCurrentUser] = React.useState<User | null>(null);
-  const [teamName, setTeamName] = React.useState(''); // State to handle team name input
-  const [selectedLeague, setSelectedLeague] = React.useState(''); // State for selected league
-  const [selectedDivision, setSelectedDivision] = React.useState(''); // State for selected division
-  const [leagues, setLeagues] = React.useState([]); // State to store available leagues
-  const [divisions, setDivisions] = React.useState([]); // State to store divisions for the selected league
-  const [errorMessage, setErrorMessage] = React.useState(''); // Error message state
-  const [loading, setLoading] = React.useState(false); // Loading state
+  const [teamName, setTeamName] = React.useState<string>(''); // Estado para el nombre del equipo
+  const [selectedLeague, setSelectedLeague] = React.useState<string>(''); // Estado para la liga seleccionada
+  const [selectedDivision, setSelectedDivision] = React.useState<string>(''); // Estado para la división seleccionada
+  const [leagues, setLeagues] = React.useState<League[]>([]); // Estado para almacenar las ligas
+  const [divisions, setDivisions] = React.useState<Division[]>([]); // Estado para almacenar las divisiones
+  const [errorMessage, setErrorMessage] = React.useState<string>(''); // Estado para mensajes de error
+  const [loading, setLoading] = React.useState<boolean>(false); // Estado para manejar el estado de carga
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get the current user
+  // Obtener el usuario actual
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
       } else {
         setCurrentUser(null);
-        navigate('/login'); // Redirect to login if not authenticated
+        navigate('/login'); // Redirige a la página de login si no está autenticado
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
-  // Fetch available leagues from Firestore
+  // Obtener las ligas disponibles de Firestore
   React.useEffect(() => {
     const fetchLeagues = async () => {
       try {
@@ -49,9 +60,9 @@ export default function CreateTeam() {
         const leagueSnapshot = await getDocs(leaguesCollection);
         const leagueList = leagueSnapshot.docs.map((doc) => ({
           id: doc.id,
-          name: doc.data().leagueName, // Assuming 'leagueName' is the field in Firestore
+          name: doc.data().leagueName, // Asegurando que 'leagueName' es el campo en Firestore
         }));
-        setLeagues(leagueList); // Set the list of leagues
+        setLeagues(leagueList); // Establecer la lista de ligas
       } catch (error) {
         console.error('Error fetching leagues:', error);
       }
@@ -60,7 +71,7 @@ export default function CreateTeam() {
     fetchLeagues();
   }, []);
 
-  // Fetch divisions based on selected league
+  // Obtener las divisiones según la liga seleccionada
   React.useEffect(() => {
     const fetchDivisions = async () => {
       if (!selectedLeague) return;
@@ -70,9 +81,9 @@ export default function CreateTeam() {
         const divisionSnapshot = await getDocs(divisionsCollection);
         const divisionList = divisionSnapshot.docs.map((doc) => ({
           id: doc.id,
-          name: doc.data().divisionName, // Assuming 'divisionName' is the field in Firestore
+          name: doc.data().divisionName, // Asegurando que 'divisionName' es el campo en Firestore
         }));
-        setDivisions(divisionList); // Set the list of divisions for the selected league
+        setDivisions(divisionList); // Establecer la lista de divisiones para la liga seleccionada
       } catch (error) {
         console.error('Error fetching divisions:', error);
       }
@@ -81,7 +92,7 @@ export default function CreateTeam() {
     fetchDivisions();
   }, [selectedLeague]);
 
-  // Handle creating a team
+  // Manejar la creación del equipo
   const handleCreateTeam = async () => {
     if (!teamName || !selectedLeague || !selectedDivision) {
       setErrorMessage('Please enter a team name, select a league, and a division.');
@@ -91,35 +102,35 @@ export default function CreateTeam() {
     try {
       setLoading(true);
 
-      // Create a new team in Firestore
-      const teamDocRef = doc(db, 'teams', teamName);
+      // Crear un nuevo equipo en Firestore
+      const teamDocRef = doc(db, 'teams', teamName); // Aquí te aseguras que `teamName` sea siempre un string
       await setDoc(teamDocRef, {
         teamName: teamName,
         leader: currentUser?.uid,
-        league: selectedLeague, // Store the selected league
-        players: [currentUser?.uid], // Leader is automatically part of the players array
-        joinRequests: [], // Empty array for join requests
+        league: selectedLeague, // Almacenar la liga seleccionada
+        players: [currentUser?.uid], // El líder es automáticamente parte del array de jugadores
+        joinRequests: [], // Array vacío para solicitudes de unión
       });
 
-      // Update the user's role to Leader
-      const userDocRef = doc(db, 'users', currentUser?.uid);
+      // Actualizar el rol del usuario a 'Leader'
+      const userDocRef = doc(db, 'users', currentUser?.uid as string); // Aseguramos que `uid` no sea undefined
       await updateDoc(userDocRef, {
         role: 'Leader',
-        teamName: teamName, // Save the team name under the user
+        teamName: teamName, // Guardar el nombre del equipo bajo el usuario
       });
 
-      // Add the new team to the division's teams array
+      // Agregar el nuevo equipo al array de equipos de la división
       const divisionDocRef = doc(db, `leagues/${selectedLeague}/divisions`, selectedDivision);
       await updateDoc(divisionDocRef, {
-        teams: arrayUnion(teamName), // Add the team name to the division's teams array
+        teams: arrayUnion(teamName), // Agregar el nombre del equipo al array de equipos de la división
       });
 
-      setErrorMessage(''); // Clear any error messages
-      setTeamName(''); // Clear the team name input
-      setSelectedLeague(''); // Clear selected league
-      setSelectedDivision(''); // Clear selected division
+      setErrorMessage(''); // Limpiar mensajes de error
+      setTeamName(''); // Limpiar el campo del nombre del equipo
+      setSelectedLeague(''); // Limpiar la liga seleccionada
+      setSelectedDivision(''); // Limpiar la división seleccionada
 
-      navigate('/team'); // Redirect to the team page after creation
+      navigate('/team'); // Redirigir a la página del equipo después de la creación
     } catch (error) {
       console.error('Error creating team or updating division:', error);
       setErrorMessage('Failed to create the team or update the division.');
@@ -153,7 +164,7 @@ export default function CreateTeam() {
                   required
                 />
 
-                {/* Dropdown for selecting a league */}
+                {/* Dropdown para seleccionar una liga */}
                 <select
                   value={selectedLeague}
                   onChange={(e) => setSelectedLeague(e.target.value)}
@@ -168,7 +179,7 @@ export default function CreateTeam() {
                   ))}
                 </select>
 
-                {/* Dropdown for selecting a division */}
+                {/* Dropdown para seleccionar una división */}
                 {selectedLeague && (
                   <select
                     value={selectedDivision}
@@ -186,7 +197,7 @@ export default function CreateTeam() {
                 )}
 
                 <Button
-                  variant="contained"
+                  component="button"
                   size="sm"
                   sx={{ ml: 2 }}
                   onClick={handleCreateTeam}

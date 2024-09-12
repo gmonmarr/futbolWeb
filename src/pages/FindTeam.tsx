@@ -15,36 +15,55 @@ import { auth, db } from '../firebase.js';
 import { collection, getDocs, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
+// Definir tipos para equipos, ligas y divisiones
+interface Team {
+  id: string;
+  teamName: string;
+  leaderName: string;
+  players: string[];
+  joinRequests: string[];
+}
+
+interface League {
+  id: string;
+  leagueName: string;
+}
+
+interface Division {
+  id: string;
+  divisionName: string;
+}
+
 export default function FindTeam() {
   const [currentUser, setCurrentUser] = React.useState<User | null>(null);
-  const [teams, setTeams] = React.useState<any[]>([]); // State to store teams in the selected league and division
-  const [leagues, setLeagues] = React.useState([]); // State to store available leagues
-  const [divisions, setDivisions] = React.useState([]); // State to store available divisions
-  const [selectedLeague, setSelectedLeague] = React.useState(''); // State for selected league
-  const [selectedDivision, setSelectedDivision] = React.useState(''); // State for selected division
-  const [requestedTeams, setRequestedTeams] = React.useState<string[]>([]); // State to track requested teams
-  const [alreadyInTeam, setAlreadyInTeam] = React.useState(false); // State to track if user is already in a team in the league
-  const [errorMessage, setErrorMessage] = React.useState(''); // Error message state
-  const [loading, setLoading] = React.useState(false); // Loading state
-  const [hasAlreadyRequested, setHasAlreadyRequested] = React.useState(false); // Tracks if the user has requested to join any team
+  const [teams, setTeams] = React.useState<Team[]>([]); // Estado para almacenar equipos con el tipo correcto
+  const [leagues, setLeagues] = React.useState<League[]>([]);
+  const [divisions, setDivisions] = React.useState<Division[]>([]);
+  const [selectedLeague, setSelectedLeague] = React.useState<string>(''); // Aseguramos que sea string
+  const [selectedDivision, setSelectedDivision] = React.useState<string>(''); // Aseguramos que sea string
+  const [requestedTeams, setRequestedTeams] = React.useState<string[]>([]);
+  const [alreadyInTeam, setAlreadyInTeam] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState<string>(''); // Mensajes de error
+  const [loading, setLoading] = React.useState(false);
+  const [hasAlreadyRequested, setHasAlreadyRequested] = React.useState(false); // Indica si ya solicitó unirse a un equipo
   const navigate = useNavigate();
-  const location = useLocation(); // Use location hook to detect current route
+  const location = useLocation(); // Para detectar la ruta actual
 
-  // Get the current user
+  // Obtener el usuario actual
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
       } else {
         setCurrentUser(null);
-        navigate('/login'); // Redirect to login if not authenticated
+        navigate('/login'); // Redirigir al login si no está autenticado
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
-  // Fetch available leagues from Firestore
+  // Obtener ligas disponibles
   React.useEffect(() => {
     const fetchLeagues = async () => {
       try {
@@ -52,9 +71,9 @@ export default function FindTeam() {
         const leaguesSnapshot = await getDocs(leaguesCollection);
         const leagueList = leaguesSnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
+          leagueName: doc.data().leagueName,
         }));
-        setLeagues(leagueList); // Set the list of leagues
+        setLeagues(leagueList);
       } catch (error) {
         setErrorMessage('Failed to fetch leagues.');
       }
@@ -63,7 +82,7 @@ export default function FindTeam() {
     fetchLeagues();
   }, []);
 
-  // Fetch divisions when a league is selected
+  // Obtener divisiones al seleccionar una liga
   React.useEffect(() => {
     const fetchDivisions = async () => {
       if (!selectedLeague) return;
@@ -73,9 +92,9 @@ export default function FindTeam() {
         const divisionsSnapshot = await getDocs(divisionsCollection);
         const divisionList = divisionsSnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
+          divisionName: doc.data().divisionName,
         }));
-        setDivisions(divisionList); // Set the list of divisions for the selected league
+        setDivisions(divisionList);
       } catch (error) {
         setErrorMessage('Failed to fetch divisions.');
       }
@@ -84,7 +103,7 @@ export default function FindTeam() {
     fetchDivisions();
   }, [selectedLeague]);
 
-  // Fetch teams from Firestore and check if the user has already requested to join a team
+  // Obtener equipos y verificar si el usuario ya solicitó unirse
   React.useEffect(() => {
     if (!selectedLeague || !selectedDivision) return;
 
@@ -97,7 +116,7 @@ export default function FindTeam() {
           const divisionData = divisionDoc.data();
           const teamNames = divisionData.teams || [];
 
-          const fetchedTeams = [];
+          const fetchedTeams: Team[] = []; // Tipado para equipos
           const requestedTeamsArray: string[] = [];
           let userInTeam = false;
           let userRequestedAnyTeam = false;
@@ -109,31 +128,37 @@ export default function FindTeam() {
             if (teamDoc.exists()) {
               const teamData = teamDoc.data();
 
-              // Fetch the leader's name from the users collection using the leader's UID
+              // Obtener el nombre del líder del equipo desde la colección de usuarios
               const leaderDocRef = doc(db, 'users', teamData.leader);
               const leaderDoc = await getDoc(leaderDocRef);
               const leaderName = leaderDoc.exists() ? leaderDoc.data().name : 'Unknown Leader';
 
-              // Add the leader's name to the team data
-              fetchedTeams.push({ id: teamName, leaderName, ...teamData });
+              // Agregar el equipo y el nombre del líder
+              fetchedTeams.push({
+                id: teamName,
+                teamName: teamData.teamName,
+                leaderName,
+                players: teamData.players,
+                joinRequests: teamData.joinRequests,
+              });
 
-              // Check if the user has already requested to join this or any other team
+              // Verificar si el usuario ya solicitó unirse al equipo
               if (teamData.joinRequests && teamData.joinRequests.includes(currentUser?.uid)) {
                 requestedTeamsArray.push(teamName);
-                userRequestedAnyTeam = true; // Set this flag if the user requested any team
+                userRequestedAnyTeam = true;
               }
 
-              // Check if the user is already in this team
+              // Verificar si el usuario ya está en este equipo
               if (teamData.players && teamData.players.includes(currentUser?.uid)) {
                 userInTeam = true;
               }
             }
           }
 
-          setTeams(fetchedTeams); // Update teams state with fetched data
-          setRequestedTeams(requestedTeamsArray); // Update requested teams
-          setAlreadyInTeam(userInTeam); // Set the state to true if the user is already in a team in this league
-          setHasAlreadyRequested(userRequestedAnyTeam); // Block further requests if already requested
+          setTeams(fetchedTeams);
+          setRequestedTeams(requestedTeamsArray);
+          setAlreadyInTeam(userInTeam);
+          setHasAlreadyRequested(userRequestedAnyTeam);
         } else {
           setErrorMessage('Division does not exist.');
         }
@@ -145,7 +170,7 @@ export default function FindTeam() {
     fetchTeamsAndCheckMembership();
   }, [selectedLeague, selectedDivision, currentUser]);
 
-  // Handle join request
+  // Función para manejar la solicitud de unirse al equipo
   const handleJoinRequest = async (teamId: string) => {
     if (hasAlreadyRequested) {
       setErrorMessage('You have already requested to join a team.');
@@ -154,18 +179,13 @@ export default function FindTeam() {
 
     try {
       setLoading(true);
-
-      // Update the team's joinRequests array to include the current user's ID
       const teamDocRef = doc(db, 'teams', teamId);
       await updateDoc(teamDocRef, {
-        joinRequests: arrayUnion(currentUser?.uid), // Add the current user's ID to join requests
+        joinRequests: arrayUnion(currentUser?.uid),
       });
-
-      // Update the state to reflect that this team was requested
       setRequestedTeams((prevRequestedTeams) => [...prevRequestedTeams, teamId]);
-      setHasAlreadyRequested(true); // Set the flag to block further requests
-
-      setErrorMessage(''); // Clear any error messages
+      setHasAlreadyRequested(true);
+      setErrorMessage('');
     } catch (error) {
       setErrorMessage('Failed to send join request.');
     } finally {
@@ -191,13 +211,12 @@ export default function FindTeam() {
                   Find a Team in a League
                 </Typography>
 
-                {/* Dropdown for selecting a league */}
                 <select
                   value={selectedLeague}
                   onChange={(e) => {
                     setSelectedLeague(e.target.value);
-                    setSelectedDivision(''); // Reset division when league changes
-                    setTeams([]); // Clear teams when league changes
+                    setSelectedDivision('');
+                    setTeams([]);
                   }}
                   required
                   style={{ marginBottom: '10px', padding: '5px' }}
@@ -210,7 +229,6 @@ export default function FindTeam() {
                   ))}
                 </select>
 
-                {/* Dropdown for selecting a division */}
                 {selectedLeague && (
                   <select
                     value={selectedDivision}
@@ -227,7 +245,6 @@ export default function FindTeam() {
                   </select>
                 )}
 
-                {/* Display teams based on selected league and division */}
                 {teams.length > 0 ? (
                   teams.map((team) => (
                     <Box key={team.id} sx={{ mt: 2 }}>
@@ -235,14 +252,14 @@ export default function FindTeam() {
                         Team: {team.teamName}
                       </Typography>
                       <Typography level="body-md" component="p">
-                        Leader: {team.leaderName} {/* Display leader's name */}
+                        Leader: {team.leaderName}
                       </Typography>
                       <Button
-                        variant="contained"
+                        component="button"
                         size="sm"
                         sx={{ mt: 1 }}
                         onClick={() => handleJoinRequest(team.id)}
-                        disabled={loading || alreadyInTeam || requestedTeams.includes(team.id) || hasAlreadyRequested} // Disable if loading, already in team, already requested, or has already requested to join another team
+                        disabled={loading || alreadyInTeam || requestedTeams.includes(team.id) || hasAlreadyRequested}
                       >
                         {alreadyInTeam
                           ? 'Already in a Team'
