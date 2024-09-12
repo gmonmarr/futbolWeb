@@ -1,3 +1,5 @@
+// src/pages/Admin.tsx
+
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -21,7 +23,7 @@ const Admin: React.FC = () => {
     cancha: '',
     division: '',
   });
-  
+
   const navigate = useNavigate();
 
   // Chequear si el usuario está autenticado y obtener su rol
@@ -34,6 +36,7 @@ const Admin: React.FC = () => {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
+          console.log('Datos del usuario:', userData);  // Agregando depuración
           setUserRole(userData.role);
         } else {
           console.log("No se encontraron datos del usuario.");
@@ -49,7 +52,8 @@ const Admin: React.FC = () => {
 
   // Verificar que el usuario sea admin
   useEffect(() => {
-    if (userRole !== 'Admin') {
+    if (userRole && userRole !== 'Admin') {
+      console.log('Rol de usuario:', userRole);  // Agregando depuración
       alert('Acceso denegado. Solo los administradores pueden acceder a esta página.');
       navigate('/'); // Redirige a la página de inicio si no es admin
     }
