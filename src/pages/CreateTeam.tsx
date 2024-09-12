@@ -19,7 +19,9 @@ export default function CreateTeam() {
   const [currentUser, setCurrentUser] = React.useState<User | null>(null);
   const [teamName, setTeamName] = React.useState(''); // State to handle team name input
   const [selectedLeague, setSelectedLeague] = React.useState(''); // State for selected league
+  const [selectedDivision, setSelectedDivision] = React.useState(''); // State for selected division
   const [leagues, setLeagues] = React.useState([]); // State to store available leagues
+  const [divisions, setDivisions] = React.useState([]); // State to store divisions for the selected league
   const [errorMessage, setErrorMessage] = React.useState(''); // Error message state
   const [loading, setLoading] = React.useState(false); // Loading state
   const navigate = useNavigate();
@@ -58,53 +60,36 @@ export default function CreateTeam() {
     fetchLeagues();
   }, []);
 
-  // Check if the user is already part of any team in the selected league
-  const isUserInLeagueTeam = async (selectedLeagueId: string) => {
-    try {
-      const leagueDocRef = doc(db, 'leagues', selectedLeagueId);
-      const leagueDoc = await getDoc(leagueDocRef);
+  // Fetch divisions based on selected league
+  React.useEffect(() => {
+    const fetchDivisions = async () => {
+      if (!selectedLeague) return;
 
-      if (leagueDoc.exists()) {
-        const leagueData = leagueDoc.data();
-        const teamIds = leagueData.teams || [];
-
-        for (let teamId of teamIds) {
-          const teamDocRef = doc(db, 'teams', teamId);
-          const teamDoc = await getDoc(teamDocRef);
-
-          if (teamDoc.exists()) {
-            const teamData = teamDoc.data();
-            if (teamData.players.includes(currentUser?.uid)) {
-              return true; // User is already part of a team in this league
-            }
-          }
-        }
+      try {
+        const divisionsCollection = collection(db, `leagues/${selectedLeague}/divisions`);
+        const divisionSnapshot = await getDocs(divisionsCollection);
+        const divisionList = divisionSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().divisionName, // Assuming 'divisionName' is the field in Firestore
+        }));
+        setDivisions(divisionList); // Set the list of divisions for the selected league
+      } catch (error) {
+        console.error('Error fetching divisions:', error);
       }
+    };
 
-      return false; // User is not part of any team in this league
-    } catch (error) {
-      console.error('Error checking user team membership:', error);
-      return false; // Default to false on error
-    }
-  };
+    fetchDivisions();
+  }, [selectedLeague]);
 
   // Handle creating a team
   const handleCreateTeam = async () => {
-    if (!teamName || !selectedLeague) {
-      setErrorMessage('Please enter a team name and select a league.');
+    if (!teamName || !selectedLeague || !selectedDivision) {
+      setErrorMessage('Please enter a team name, select a league, and a division.');
       return;
     }
 
     try {
       setLoading(true);
-
-      // Check if the user is already part of a team in the selected league
-      const userInLeagueTeam = await isUserInLeagueTeam(selectedLeague);
-      if (userInLeagueTeam) {
-        setErrorMessage('You are already part of a team in this league.');
-        setLoading(false);
-        return;
-      }
 
       // Create a new team in Firestore
       const teamDocRef = doc(db, 'teams', teamName);
@@ -123,23 +108,21 @@ export default function CreateTeam() {
         teamName: teamName, // Save the team name under the user
       });
 
-      // Refresh the user's token to ensure the role is propagated
-      await currentUser?.getIdToken(true);
-
-      // Add the new team to the league's document
-      const leagueDocRef = doc(db, 'leagues', selectedLeague);
-      await updateDoc(leagueDocRef, {
-        teams: arrayUnion(teamDocRef.id), // Add the team ID to the league's team array
+      // Add the new team to the division's teams array
+      const divisionDocRef = doc(db, `leagues/${selectedLeague}/divisions`, selectedDivision);
+      await updateDoc(divisionDocRef, {
+        teams: arrayUnion(teamName), // Add the team name to the division's teams array
       });
 
       setErrorMessage(''); // Clear any error messages
       setTeamName(''); // Clear the team name input
       setSelectedLeague(''); // Clear selected league
+      setSelectedDivision(''); // Clear selected division
 
       navigate('/team'); // Redirect to the team page after creation
     } catch (error) {
-      console.error('Error creating team or updating league:', error);
-      setErrorMessage('Failed to create the team or update the league.');
+      console.error('Error creating team or updating division:', error);
+      setErrorMessage('Failed to create the team or update the division.');
     } finally {
       setLoading(false);
     }
@@ -184,6 +167,23 @@ export default function CreateTeam() {
                     </option>
                   ))}
                 </select>
+
+                {/* Dropdown for selecting a division */}
+                {selectedLeague && (
+                  <select
+                    value={selectedDivision}
+                    onChange={(e) => setSelectedDivision(e.target.value)}
+                    required
+                    style={{ marginLeft: '10px', marginBottom: '10px' }}
+                  >
+                    <option value="">Select a division</option>
+                    {divisions.map((division) => (
+                      <option key={division.id} value={division.id}>
+                        {division.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
                 <Button
                   variant="contained"

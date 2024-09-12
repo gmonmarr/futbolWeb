@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-// import { useNavigate } from 'react-router-dom';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';

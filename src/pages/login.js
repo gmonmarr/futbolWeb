@@ -11,7 +11,6 @@ import {
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
-
 function Login() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
