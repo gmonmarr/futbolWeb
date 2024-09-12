@@ -9,9 +9,7 @@ import ListItemButton from '@mui/joy/ListItemButton';
 import ListItemDecorator from '@mui/joy/ListItemDecorator';
 import ListItemContent from '@mui/joy/ListItemContent';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import ArticleRoundedIcon from '@mui/icons-material/ArticleRounded';
-import AccountTreeRoundedIcon from '@mui/icons-material/AccountTreeRounded';
 import TodayRoundedIcon from '@mui/icons-material/TodayRounded';
 import GroupAddRoundedIcon from '@mui/icons-material/GroupAddRounded'; // Icon for Create Team
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'; // Icon for Find Team
@@ -40,22 +38,6 @@ export default function Navigation() {
                 <PeopleRoundedIcon fontSize="small" />
               </ListItemDecorator>
               <ListItemContent>Alta/Baja de Jugadores</ListItemContent>
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton selected={location.pathname === '/rol-juegos'} onClick={() => navigate('/rol-juegos')}>
-              <ListItemDecorator sx={{ color: 'neutral.500' }}>
-                <AssignmentIndRoundedIcon fontSize="small" />
-              </ListItemDecorator>
-              <ListItemContent>Rol de Juegos</ListItemContent>
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton selected={location.pathname === '/tabla-puntos'} onClick={() => navigate('/tabla-puntos')}>
-              <ListItemDecorator sx={{ color: 'neutral.500' }}>
-                <AccountTreeRoundedIcon fontSize="small" />
-              </ListItemDecorator>
-              <ListItemContent>Tabla de Puntos</ListItemContent>
             </ListItemButton>
           </ListItem>
           <ListItem>

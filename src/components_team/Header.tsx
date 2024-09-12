@@ -123,11 +123,11 @@ export default function Header() {
           variant="plain"
           color="neutral"
           component="a"
-          href="/joy-ui/getting-started/templates/email/"
+          href="/getting-started/templates/calendar/"
           size="sm"
           sx={{ alignSelf: 'center' }}
         >
-          Email
+          Calendario
         </Button>
         <Button
           variant="plain"
@@ -138,7 +138,7 @@ export default function Header() {
           size="sm"
           sx={{ alignSelf: 'center' }}
         >
-          Team
+          Equipos
         </Button>
         <Button
           variant="plain"
@@ -148,7 +148,7 @@ export default function Header() {
           size="sm"
           sx={{ alignSelf: 'center' }}
         >
-          Files
+          ???
         </Button>
       </Stack>
 
