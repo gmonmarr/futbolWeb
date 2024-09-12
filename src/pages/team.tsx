@@ -148,33 +148,34 @@ export default function TeamExample() {
                 </Typography>
 
                 {/* Display teams the user is the leader of */}
-                <Box sx={{ mt: 3 }}>
-                  <Typography level="title-md" textColor="text.secondary" component="p">
-                    Teams You Lead:
-                  </Typography>
+                <Box sx={{ mt: 3, width: '100%', textAlign: 'left' }}>
+  <Typography level="title-md" textColor="text.secondary" component="p">
+    Teams You Lead:
+  </Typography>
 
-                  {teams.length > 0 ? (
-                    teams.map((team) => (
-                      <Box key={team.id} sx={{ mt: 2 }}>
-                        <Typography level="body-md" component="p">
-                          Team: {team.teamName}
-                        </Typography>
-                        <Button
-                          variant="contained"
-                          size="sm"
-                          sx={{ mt: 1 }}
-                          onClick={() => handleTeamSelect(team)}
-                        >
-                          {selectedTeamId === team.id ? 'Hide Join Requests' : 'View Join Requests'}
-                        </Button>
-                      </Box>
-                    ))
-                  ) : (
-                    <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
-                      You are not the leader of any teams.
-                    </Typography>
-                  )}
-                </Box>
+  {teams.length > 0 ? (
+    teams.map((team) => (
+      <Box key={team.id} sx={{ mt: 2, textAlign: 'left' }}>
+        <Typography level="body-md" component="p">
+          Team: {team.teamName}
+        </Typography>
+        <Button
+          variant="contained"
+          size="sm"
+          sx={{ mt: 1 }}
+          onClick={() => handleTeamSelect(team)}
+        >
+          {selectedTeamId === team.id ? 'Hide Join Requests' : 'View Join Requests'}
+        </Button>
+      </Box>
+    ))
+  ) : (
+    <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
+      You are not the leader of any teams.
+    </Typography>
+  )}
+</Box>
+
 
                 {/* Display join requests for the selected team */}
                 {selectedTeamId && joinRequests.length > 0 && (
