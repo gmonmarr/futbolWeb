@@ -148,7 +148,7 @@ export default function TeamExample() {
                 </Typography>
 
                 {/* Display teams the user is the leader of */}
-                <Box sx={{ mt: 3, width: '100%', textAlign: 'left' }}>
+                <Box sx={{ mt: 3, width: '100%', textAlign: 'left', display: 'flex', flexDirection: 'column' }}>
   <Typography level="title-md" textColor="text.secondary" component="p">
     Teams You Lead:
   </Typography>
@@ -174,9 +174,46 @@ export default function TeamExample() {
       You are not the leader of any teams.
     </Typography>
   )}
+
+  {/* Display join requests for the selected team */}
+  {selectedTeamId && joinRequests.length > 0 && (
+    <Box sx={{ mt: 3, textAlign: 'left' }}>
+      <Typography level="title-md" textColor="text.secondary" component="p">
+        Join Requests:
+      </Typography>
+
+      {requestingUsers.length > 0 ? (
+        requestingUsers.map((user) => (
+          <Box key={user.id} sx={{ mt: 2 }}>
+            <Typography level="body-md" component="p">
+              Request from: {user.name}
+            </Typography>
+            <Button
+              variant="contained"
+              size="sm"
+              sx={{ mt: 1, mr: 1 }}
+              onClick={() => handleAcceptRequest(selectedTeamId, user.id)}
+            >
+              Accept
+            </Button>
+            <Button
+              variant="outlined"
+              size="sm"
+              sx={{ mt: 1 }}
+              onClick={() => handleDenyRequest(selectedTeamId, user.id)}
+            >
+              Deny
+            </Button>
+          </Box>
+        ))
+      ) : (
+        <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
+          No join requests.
+        </Typography>
+      )}
+    </Box>
+  )}
 </Box>
-
-
                 {/* Display join requests for the selected team */}
                 {selectedTeamId && joinRequests.length > 0 && (
                   <Box sx={{ mt: 3 }}>
