@@ -123,7 +123,7 @@ export default function Header() {
           variant="plain"
           color="neutral"
           component="a"
-          href="/getting-started/templates/calendar/"
+          href="./calendar"
           size="sm"
           sx={{ alignSelf: 'center' }}
         >
