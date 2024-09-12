@@ -1,16 +1,9 @@
-// src/pages/CreateTeam.tsx
-
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom'; // Removed useLocation import
-import { CssVarsProvider } from '@mui/joy/styles';
-import CssBaseline from '@mui/joy/CssBaseline';
-import Box from '@mui/joy/Box';
-import Typography from '@mui/joy/Typography';
-import Button from '@mui/joy/Button';
+import { useNavigate } from 'react-router-dom';
+import { CssBaseline, Box, Typography, Button, TextField, FormControl, InputLabel, Select, MenuItem, Alert } from '@mui/material'; // Usamos los componentes de @mui/material
 import Layout from '../components_team/Layout.tsx';
 import Header from '../components_team/Header.tsx';
-import Navigation from '../components_team/Navigation.tsx'; // Import Navigation
-import './team.css';
+import Navigation from '../components_team/Navigation.tsx';
 import { auth, db } from '../firebase';
 import { doc, setDoc, updateDoc, collection, getDocs, arrayUnion } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -28,14 +21,14 @@ interface Division {
 
 export default function CreateTeam() {
   const [currentUser, setCurrentUser] = React.useState<User | null>(null);
-  const [teamName, setTeamName] = React.useState<string>(''); // State for team name
-  const [selectedLeague, setSelectedLeague] = React.useState<string>(''); // State for selected league
-  const [selectedDivision, setSelectedDivision] = React.useState<string>(''); // State for selected division
-  const [leagues, setLeagues] = React.useState<League[]>([]); // State to store leagues
-  const [divisions, setDivisions] = React.useState<Division[]>([]); // State to store divisions
-  const [errorMessage, setErrorMessage] = React.useState<string>(''); // State for error messages
-  const [loading, setLoading] = React.useState<boolean>(false); // State for loading state
-  const navigate = useNavigate(); // Removed location
+  const [teamName, setTeamName] = React.useState<string>(''); 
+  const [selectedLeague, setSelectedLeague] = React.useState<string>(''); 
+  const [selectedDivision, setSelectedDivision] = React.useState<string>(''); 
+  const [leagues, setLeagues] = React.useState<League[]>([]); 
+  const [divisions, setDivisions] = React.useState<Division[]>([]); 
+  const [errorMessage, setErrorMessage] = React.useState<string>(''); 
+  const [loading, setLoading] = React.useState<boolean>(false); 
+  const navigate = useNavigate(); 
 
   // Get the current user
   React.useEffect(() => {
@@ -44,7 +37,7 @@ export default function CreateTeam() {
         setCurrentUser(user);
       } else {
         setCurrentUser(null);
-        navigate('/login'); // Redirect to login if not authenticated
+        navigate('/login'); 
       }
     });
 
@@ -59,9 +52,9 @@ export default function CreateTeam() {
         const leagueSnapshot = await getDocs(leaguesCollection);
         const leagueList = leagueSnapshot.docs.map((doc) => ({
           id: doc.id,
-          name: doc.data().leagueName, // Ensure 'leagueName' is the field in Firestore
+          name: doc.data().leagueName, 
         }));
-        setLeagues(leagueList); // Set the list of leagues
+        setLeagues(leagueList); 
       } catch (error) {
         console.error('Error fetching leagues:', error);
       }
@@ -80,9 +73,9 @@ export default function CreateTeam() {
         const divisionSnapshot = await getDocs(divisionsCollection);
         const divisionList = divisionSnapshot.docs.map((doc) => ({
           id: doc.id,
-          name: doc.data().divisionName, // Ensure 'divisionName' is the field in Firestore
+          name: doc.data().divisionName, 
         }));
-        setDivisions(divisionList); // Set the list of divisions for the selected league
+        setDivisions(divisionList); 
       } catch (error) {
         console.error('Error fetching divisions:', error);
       }
@@ -101,35 +94,32 @@ export default function CreateTeam() {
     try {
       setLoading(true);
 
-      // Create a new team in Firestore
-      const teamDocRef = doc(db, 'teams', teamName); // Ensure `teamName` is always a string
+      const teamDocRef = doc(db, 'teams', teamName); 
       await setDoc(teamDocRef, {
-        teamName: teamName,
+        teamName,
         leader: currentUser?.uid,
-        league: selectedLeague, // Store the selected league
-        players: [currentUser?.uid], // Leader is automatically part of the players array
-        joinRequests: [], // Empty array for join requests
+        league: selectedLeague, 
+        players: [currentUser?.uid], 
+        joinRequests: [], 
       });
 
-      // Update the user's role to 'Leader'
-      const userDocRef = doc(db, 'users', currentUser?.uid as string); // Ensure `uid` is not undefined
+      const userDocRef = doc(db, 'users', currentUser?.uid as string); 
       await updateDoc(userDocRef, {
         role: 'Leader',
-        teamName: teamName, // Save the team name under the user
+        teamName, 
       });
 
-      // Add the new team to the division's teams array
       const divisionDocRef = doc(db, `leagues/${selectedLeague}/divisions`, selectedDivision);
       await updateDoc(divisionDocRef, {
-        teams: arrayUnion(teamName), // Add the team name to the division's teams array
+        teams: arrayUnion(teamName), 
       });
 
-      setErrorMessage(''); // Clear error messages
-      setTeamName(''); // Clear team name input
-      setSelectedLeague(''); // Clear selected league
-      setSelectedDivision(''); // Clear selected division
+      setErrorMessage(''); 
+      setTeamName(''); 
+      setSelectedLeague(''); 
+      setSelectedDivision(''); 
 
-      navigate('/team'); // Redirect to the team page after creation
+      navigate('/team'); 
     } catch (error) {
       console.error('Error creating team or updating division:', error);
       setErrorMessage('Failed to create the team or update the division.');
@@ -139,88 +129,124 @@ export default function CreateTeam() {
   };
 
   return (
-    <CssVarsProvider disableTransitionOnChange>
+    <>
       <CssBaseline />
       <Layout.Root>
         <Layout.Header>
           <Header />
         </Layout.Header>
         <Layout.SideNav>
-          {/* Removed the 'currentPath' prop */}
           <Navigation />
         </Layout.SideNav>
         <Layout.SidePane>
-          <Box className="team-header-box">
+          <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              paddingBottom: '280px',
+              alignItems: 'center', 
+              minHeight: '100vh', 
+              backgroundColor: '#f5f5f5'
+            }}
+          >
             {currentUser ? (
-              <Box sx={{ mt: 3 }}>
-                <Typography level="title-md" component="p" sx={{ mb: 1 }}>
-                  Create a new team:
+              <Box 
+                sx={{
+                  mt: 3,
+                  maxWidth: '500px',
+                  width: '100%',
+                  padding: '30px',
+                  backgroundColor: 'white',
+                  boxShadow: '0px 4px 12px rgba(0,0,0,0.1)',
+                  borderRadius: '8px',
+                }}
+              >
+                <Typography 
+                  variant="h4" 
+                  component="h1" 
+                  sx={{ mb: 3, textAlign: 'center', fontWeight: 'bold' }}
+                >
+                  Create a New Team
                 </Typography>
-                <input
-                  type="text"
-                  placeholder="Enter team name"
+
+                <TextField
+                  fullWidth
+                  label="Team Name"
                   value={teamName}
                   onChange={(e) => setTeamName(e.target.value)}
                   required
+                  sx={{ mb: 2 }}
                 />
 
-                {/* Dropdown for selecting a league */}
-                <select
-                  value={selectedLeague}
-                  onChange={(e) => setSelectedLeague(e.target.value)}
-                  required
-                  style={{ marginLeft: '10px', marginBottom: '10px' }}
-                >
-                  <option value="">Select a league</option>
-                  {leagues.map((league) => (
-                    <option key={league.id} value={league.id}>
-                      {league.name}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Dropdown for selecting a division */}
-                {selectedLeague && (
-                  <select
-                    value={selectedDivision}
-                    onChange={(e) => setSelectedDivision(e.target.value)}
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <InputLabel>Select a League</InputLabel>
+                  <Select
+                    value={selectedLeague}
+                    onChange={(e) => setSelectedLeague(e.target.value)}
+                    label="Select a League"
                     required
-                    style={{ marginLeft: '10px', marginBottom: '10px' }}
                   >
-                    <option value="">Select a division</option>
-                    {divisions.map((division) => (
-                      <option key={division.id} value={division.id}>
-                        {division.name}
-                      </option>
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {leagues.map((league) => (
+                      <MenuItem key={league.id} value={league.id}>
+                        {league.name}
+                      </MenuItem>
                     ))}
-                  </select>
+                  </Select>
+                </FormControl>
+
+                {selectedLeague && (
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel>Select a Division</InputLabel>
+                    <Select
+                      value={selectedDivision}
+                      onChange={(e) => setSelectedDivision(e.target.value)}
+                      label="Select a Division"
+                      required
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
+                      </MenuItem>
+                      {divisions.map((division) => (
+                        <MenuItem key={division.id} value={division.id}>
+                          {division.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 )}
 
                 <Button
-                  component="button"
-                  size="sm"
-                  sx={{ ml: 2 }}
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  sx={{ mt: 2, padding: '10px' }}
                   onClick={handleCreateTeam}
                   disabled={loading}
                 >
                   {loading ? 'Creating...' : 'Create Team'}
                 </Button>
+
                 {errorMessage && (
-                  <Typography level="body-md" sx={{ color: 'red', mt: 1 }}>
+                  <Alert severity="error" sx={{ mt: 2 }}>
                     {errorMessage}
-                  </Typography>
+                  </Alert>
                 )}
               </Box>
             ) : (
-              <Typography level="title-lg" textColor="text.secondary" component="h1">
+              <Typography 
+                variant="h4" 
+                color="textSecondary" 
+                component="h1" 
+                sx={{ textAlign: 'center' }}
+              >
                 No user logged in. Please log in to create a team.
               </Typography>
             )}
           </Box>
         </Layout.SidePane>
       </Layout.Root>
-    </CssVarsProvider>
+    </>
   );
 }
-
-

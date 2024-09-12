@@ -1,21 +1,13 @@
-// src/components_team/Layout.tsx
-
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom'; // Removed `useLocation`
-import { CssVarsProvider } from '@mui/joy/styles';
-import CssBaseline from '@mui/joy/CssBaseline';
-import Box from '@mui/joy/Box';
-import Typography from '@mui/joy/Typography';
-import Button from '@mui/joy/Button';
+import { useNavigate } from 'react-router-dom';
+import { CssBaseline, Box, Typography, Button, Grid, Card, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, Alert } from '@mui/material'; // Cambiado a Material UI
 import Layout from '../components_team/Layout.tsx';
 import Header from '../components_team/Header.tsx';
 import Navigation from '../components_team/Navigation.tsx';
-import './team.css';
-import { auth, db } from '../firebase.js';
+import { auth, db } from '../firebase';
 import { collection, getDocs, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
-// Definir tipos para equipos, ligas y divisiones
 interface Team {
   id: string;
   teamName: string;
@@ -36,33 +28,34 @@ interface Division {
 
 export default function FindTeam() {
   const [currentUser, setCurrentUser] = React.useState<User | null>(null);
-  const [teams, setTeams] = React.useState<Team[]>([]); // Estado para almacenar equipos con el tipo correcto
+  const [teams, setTeams] = React.useState<Team[]>([]);
   const [leagues, setLeagues] = React.useState<League[]>([]);
   const [divisions, setDivisions] = React.useState<Division[]>([]);
-  const [selectedLeague, setSelectedLeague] = React.useState<string>(''); // Aseguramos que sea string
-  const [selectedDivision, setSelectedDivision] = React.useState<string>(''); // Aseguramos que sea string
+  const [selectedLeague, setSelectedLeague] = React.useState<string>('');
+  const [selectedDivision, setSelectedDivision] = React.useState<string>('');
   const [requestedTeams, setRequestedTeams] = React.useState<string[]>([]);
   const [alreadyInTeam, setAlreadyInTeam] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState<string>(''); // Mensajes de error
-  const [loading, setLoading] = React.useState(false);
-  const [hasAlreadyRequested, setHasAlreadyRequested] = React.useState(false); // Indica si ya solicitó unirse a un equipo
-  const navigate = useNavigate(); // Removed `location` declaration
+  const [errorMessage, setErrorMessage] = React.useState<string>('');
+  const [searchTerm, setSearchTerm] = React.useState<string>(''); // Search term
+  const [originalTeams, setOriginalTeams] = React.useState<Team[]>([]); // Original teams list
+  const [searchPerformed, setSearchPerformed] = React.useState<boolean>(false); // Track if search was performed
+  const navigate = useNavigate();
 
-  // Obtener el usuario actual
+  // Get current user
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
       } else {
         setCurrentUser(null);
-        navigate('/login'); // Redirigir al login si no está autenticado
+        navigate('/login');
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
-  // Obtener ligas disponibles
+  // Fetch leagues
   React.useEffect(() => {
     const fetchLeagues = async () => {
       try {
@@ -81,7 +74,7 @@ export default function FindTeam() {
     fetchLeagues();
   }, []);
 
-  // Obtener divisiones al seleccionar una liga
+  // Fetch divisions when league is selected
   React.useEffect(() => {
     const fetchDivisions = async () => {
       if (!selectedLeague) return;
@@ -102,11 +95,11 @@ export default function FindTeam() {
     fetchDivisions();
   }, [selectedLeague]);
 
-  // Obtener equipos y verificar si el usuario ya solicitó unirse
+  // Fetch teams and check membership
   React.useEffect(() => {
     if (!selectedLeague || !selectedDivision) return;
 
-    const fetchTeamsAndCheckMembership = async () => {
+    const fetchTeams = async () => {
       try {
         const divisionDocRef = doc(db, `leagues/${selectedLeague}/divisions`, selectedDivision);
         const divisionDoc = await getDoc(divisionDocRef);
@@ -115,10 +108,8 @@ export default function FindTeam() {
           const divisionData = divisionDoc.data();
           const teamNames = divisionData.teams || [];
 
-          const fetchedTeams: Team[] = []; // Tipado para equipos
-          const requestedTeamsArray: string[] = [];
+          const fetchedTeams: Team[] = [];
           let userInTeam = false;
-          let userRequestedAnyTeam = false;
 
           for (let teamName of teamNames) {
             const teamDocRef = doc(db, 'teams', teamName);
@@ -127,12 +118,10 @@ export default function FindTeam() {
             if (teamDoc.exists()) {
               const teamData = teamDoc.data();
 
-              // Obtener el nombre del líder del equipo desde la colección de usuarios
               const leaderDocRef = doc(db, 'users', teamData.leader);
               const leaderDoc = await getDoc(leaderDocRef);
               const leaderName = leaderDoc.exists() ? leaderDoc.data().name : 'Unknown Leader';
 
-              // Agregar el equipo y el nombre del líder
               fetchedTeams.push({
                 id: teamName,
                 teamName: teamData.teamName,
@@ -141,23 +130,15 @@ export default function FindTeam() {
                 joinRequests: teamData.joinRequests,
               });
 
-              // Verificar si el usuario ya solicitó unirse al equipo
-              if (teamData.joinRequests && teamData.joinRequests.includes(currentUser?.uid)) {
-                requestedTeamsArray.push(teamName);
-                userRequestedAnyTeam = true;
-              }
-
-              // Verificar si el usuario ya está en este equipo
-              if (teamData.players && teamData.players.includes(currentUser?.uid)) {
+              if (teamData.players.includes(currentUser?.uid)) {
                 userInTeam = true;
               }
             }
           }
 
           setTeams(fetchedTeams);
-          setRequestedTeams(requestedTeamsArray);
+          setOriginalTeams(fetchedTeams); // Set the original teams list
           setAlreadyInTeam(userInTeam);
-          setHasAlreadyRequested(userRequestedAnyTeam);
         } else {
           setErrorMessage('Division does not exist.');
         }
@@ -166,35 +147,48 @@ export default function FindTeam() {
       }
     };
 
-    fetchTeamsAndCheckMembership();
+    fetchTeams();
   }, [selectedLeague, selectedDivision, currentUser]);
 
-  // Función para manejar la solicitud de unirse al equipo
+  // Handle search
+  const handleSearch = () => {
+    if (searchTerm) {
+      const filteredTeams = teams.filter(team =>
+        team.teamName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setTeams(filteredTeams);
+      setSearchPerformed(true); // Indicate that a search has been performed
+    }
+  };
+
+  // Handle clearing the search
+  const handleClearSearch = () => {
+    setTeams(originalTeams); // Reset to the original teams list
+    setSearchTerm(''); // Clear the search input
+    setSearchPerformed(false); // Reset the search state
+  };
+
+  // Handle join request
   const handleJoinRequest = async (teamId: string) => {
-    if (hasAlreadyRequested) {
-      setErrorMessage('You have already requested to join a team.');
+    if (requestedTeams.includes(teamId)) {
+      setErrorMessage('You have already requested to join this team.');
       return;
     }
 
     try {
-      setLoading(true);
       const teamDocRef = doc(db, 'teams', teamId);
       await updateDoc(teamDocRef, {
         joinRequests: arrayUnion(currentUser?.uid),
       });
-      setRequestedTeams((prevRequestedTeams) => [...prevRequestedTeams, teamId]);
-      setHasAlreadyRequested(true);
+      setRequestedTeams([...requestedTeams, teamId]);
       setErrorMessage('');
     } catch (error) {
       setErrorMessage('Failed to send join request.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <CssVarsProvider disableTransitionOnChange>
-      <CssBaseline />
+    <CssBaseline>
       <Layout.Root>
         <Layout.Header>
           <Header />
@@ -203,94 +197,122 @@ export default function FindTeam() {
           <Navigation />
         </Layout.SideNav>
         <Layout.SidePane>
-          <Box className="team-header-box">
-            {currentUser ? (
-              <Box sx={{ mt: 3 }}>
-                <Typography level="title-lg" component="h1">
-                  Find a Team in a League
-                </Typography>
+          <Box sx={{ mt: 3, ml: 2, width: '95%'}}>
+            <Typography variant="h6" component="h1" sx={{ mb: 2 }}> {/* Cambié el tamaño a h6 */}
+              Find a Team in a League
+            </Typography>
 
-                <select
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              {/* League Dropdown */}
+              <FormControl sx={{ mr: 1, minWidth: 160 }}>
+                <InputLabel>Select a League</InputLabel>
+                <Select
                   value={selectedLeague}
                   onChange={(e) => {
                     setSelectedLeague(e.target.value);
                     setSelectedDivision('');
                     setTeams([]);
                   }}
-                  required
-                  style={{ marginBottom: '10px', padding: '5px' }}
+                  label="Select a League"
+                  size="small" // Reducido el tamaño a small
                 >
-                  <option value="">Select a League</option>
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
                   {leagues.map((league) => (
-                    <option key={league.id} value={league.id}>
+                    <MenuItem key={league.id} value={league.id}>
                       {league.leagueName}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
+                </Select>
+              </FormControl>
 
-                {selectedLeague && (
-                  <select
+              {/* Division Dropdown */}
+              {selectedLeague && (
+                <FormControl sx={{ mr: 1, minWidth: 160 }}>
+                  <InputLabel>Select a Division</InputLabel>
+                  <Select
                     value={selectedDivision}
                     onChange={(e) => setSelectedDivision(e.target.value)}
-                    required
-                    style={{ marginBottom: '10px', padding: '5px' }}
+                    label="Select a Division"
+                    size="small" // Reducido el tamaño a small
                   >
-                    <option value="">Select a Division</option>
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
                     {divisions.map((division) => (
-                      <option key={division.id} value={division.id}>
+                      <MenuItem key={division.id} value={division.id}>
                         {division.divisionName}
-                      </option>
+                      </MenuItem>
                     ))}
-                  </select>
-                )}
+                  </Select>
+                </FormControl>
+              )}
 
-                {teams.length > 0 ? (
-                  teams.map((team) => (
-                    <Box key={team.id} sx={{ mt: 2 }}>
-                      <Typography level="title-md" component="p">
-                        Team: {team.teamName}
-                      </Typography>
-                      <Typography level="body-md" component="p">
-                        Leader: {team.leaderName}
-                      </Typography>
-                      <Button
-                        component="button"
-                        size="sm"
-                        sx={{ mt: 1 }}
-                        onClick={() => handleJoinRequest(team.id)}
-                        disabled={loading || alreadyInTeam || requestedTeams.includes(team.id) || hasAlreadyRequested}
-                      >
-                        {alreadyInTeam
-                          ? 'Already in a Team'
-                          : requestedTeams.includes(team.id)
-                          ? 'Request Sent'
-                          : 'Request to Join'}
-                      </Button>
-                    </Box>
-                  ))
-                ) : selectedLeague && !teams.length ? (
-                  <Typography level="body-md" sx={{ mt: 2 }}>
-                    No teams available in this division.
-                  </Typography>
-                ) : (
-                  <Typography level="body-md" sx={{ mt: 2 }}>
-                    Please select a league and division to view teams.
-                  </Typography>
-                )}
-                {errorMessage && (
-                  <Typography level="body-md" sx={{ color: 'red', mt: 1 }}>
-                    {errorMessage}
-                  </Typography>
-                )}
-              </Box>
+              {/* Search by team name */}
+              <TextField
+                label="Search by Team Name"
+                variant="outlined"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                size="small" // Reducido el tamaño del TextField
+                sx={{ mr: 1 }}
+              />
+              <Button variant="contained" color="primary" onClick={handleSearch} size="small"> {/* Reducido el tamaño a small */}
+                Search
+              </Button>
+
+              {/* Clear Search Button, only visible after a search */}
+              {searchPerformed && (
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={handleClearSearch}
+                  size="small"
+                  sx={{ ml: 1 }} // Add margin-left to align with Search button
+                >
+                  Clear Search
+                </Button>
+              )}
+            </Box>
+
+            {teams.length > 0 ? (
+              <Grid container spacing={2}>
+                {teams.map((team) => (
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={team.id}>
+                    <Card sx={{ minHeight: '140px' }}>
+                      <CardContent>
+                        <Typography variant="subtitle1">{team.teamName}</Typography> {/* Cambié a subtitle1 */}
+                        <Typography variant="body2">Leader: {team.leaderName}</Typography>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          sx={{ mt: 1 }}
+                          onClick={() => handleJoinRequest(team.id)}
+                          disabled={requestedTeams.includes(team.id) || alreadyInTeam}
+                          size="small" // Reducido el tamaño del botón
+                        >
+                          {requestedTeams.includes(team.id) ? 'Request Sent' : 'Request to Join'}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
             ) : (
-              <Typography level="title-lg" textColor="text.secondary" component="h1">
-                No user logged in. Please log in to view teams.
+              <Typography variant="body2" sx={{ mt: 2 }}> {/* Reducido el tamaño a body2 */}
+                No teams available in this division.
               </Typography>
+            )}
+
+            {errorMessage && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {errorMessage}
+              </Alert>
             )}
           </Box>
         </Layout.SidePane>
       </Layout.Root>
-    </CssVarsProvider>
+    </CssBaseline>
   );
 }
