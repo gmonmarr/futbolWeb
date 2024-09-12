@@ -1,8 +1,5 @@
-// src/pages/Calendar.tsx
-
 import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { useDemoData } from '@mui/x-data-grid-generator';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import IconButton from '@mui/joy/IconButton';
@@ -29,17 +26,12 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import { useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 
 const FixedSizeGrid = () => {
-  const { data } = useDemoData({
-    dataSet: 'Commodity',
-    rowLength: 5,
-    maxColumns: 6,
-  });
-
   const [open, setOpen] = React.useState(false);
   const [userData, setUserData] = React.useState<{ name: string; email: string } | null>(null);
+  const [rows, setRows] = React.useState([]); // State to store rows from Firestore
   const navigate = useNavigate();
 
   // Fetch user data from Firestore
@@ -56,6 +48,20 @@ const FixedSizeGrid = () => {
     return () => unsubscribe();
   }, []);
 
+  // Fetch data from Firestore collection 'partidos'
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const querySnapshot = await getDocs(collection(db, 'partidos'));
+      const partidosData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setRows(partidosData); // Set the rows with data from Firestore
+    };
+
+    fetchData();
+  }, []);
+
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
@@ -65,6 +71,15 @@ const FixedSizeGrid = () => {
         console.error('Logout error:', error);
       });
   };
+
+  const columns = [
+    { field: 'fecha', headerName: 'Fecha', flex: 1 },
+    { field: 'hora', headerName: 'Hora', flex: 1 },
+    { field: 'equipo1', headerName: 'Local', flex: 1 },
+    { field: 'equipo2', headerName: 'Visitante', flex: 1 },
+    { field: 'cancha', headerName: 'Cancha', flex: 1 },
+    { field: 'division', headerName: 'Division', flex: 1 },
+  ];
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -208,66 +223,69 @@ const FixedSizeGrid = () => {
             </MenuButton>
 
             <Menu
-              placement="bottom-end"
-              size="sm"
-              sx={{
-                zIndex: '99999',
-                p: 1,
-                gap: 1,
-                '--ListItem-radius': 'var(--joy-radius-sm)',
-              }}
-            >
-              {userData && (
-                <MenuItem>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar
-                      src="https://i.pravatar.cc/40?img=2"
-                      srcSet="https://i.pravatar.cc/80?img=2"
-                      sx={{ borderRadius: '50%' }}
-                    />
-                    <Box sx={{ ml: 1.5 }}>
-                      <Typography level="title-sm" textColor="text.primary">
-                        {userData.name}
-                      </Typography>
-                      <Typography level="body-xs" textColor="text.tertiary">
-                        {userData.email}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </MenuItem>
-              )}
-
-              <ListDivider />
-
-              <MenuItem>
-                <HelpRoundedIcon />
-                Help
-              </MenuItem>
-
-              <MenuItem onClick={() => navigate('/settings')}>
-                <SettingsRoundedIcon />
-                Settings
-              </MenuItem>
-
-              <ListDivider />
-
-              <MenuItem onClick={handleLogout}>
-                <LogoutRoundedIcon />
-                Log out
-              </MenuItem>
-            </Menu>
-          </Dropdown>
+  placement="bottom-end"
+  size="sm"
+  sx={{
+    zIndex: '99999',
+    p: 1,
+    gap: 1,
+    '--ListItem-radius': 'var(--joy-radius-sm)',
+  }}
+>
+  {userData && (
+    <MenuItem>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Avatar
+          src="https://i.pravatar.cc/40?img=2"
+          srcSet="https://i.pravatar.cc/80?img=2"
+          sx={{ borderRadius: '50%' }}
+        />
+        <Box sx={{ ml: 1.5 }}>
+          <Typography level="title-sm" textColor="text.primary">
+            {userData.name}
+          </Typography>
+          <Typography level="body-xs" textColor="text.tertiary">
+            {userData.email}
+          </Typography>
         </Box>
       </Box>
+    </MenuItem>
+  )}
 
-      {/* Calendar DataGrid */}
-      <Box sx={{ width: '100%', padding: '16px', flexGrow: 1 }}>
-        <Box sx={{ height: 350, width: '100%' }}>
-          <DataGrid {...data} />
-        </Box>
-      </Box>
-    </Box>
-  );
+  <ListDivider />
+
+  <MenuItem>
+    <HelpRoundedIcon />
+    Help
+  </MenuItem>
+
+  <MenuItem onClick={() => navigate('/settings')}>
+    <SettingsRoundedIcon />
+    Settings
+  </MenuItem>
+
+  <ListDivider />
+
+  <MenuItem onClick={handleLogout}>
+    <LogoutRoundedIcon />
+    Log out
+  </MenuItem>
+</Menu>
+
+{/* Closing elements for the entire component */}
+</Dropdown>
+</Box>
+</Box>
+
+{/* Calendar DataGrid */}
+<Box sx={{ width: '100%', padding: '16px', flexGrow: 1 }}>
+  <Box sx={{ height: 350, width: '100%' }}>
+    <DataGrid rows={rows} columns={columns} pageSize={5} rowsPerPageOptions={[5]} />
+  </Box>
+</Box>
+</Box>
+);
 };
 
 export default FixedSizeGrid;
+
