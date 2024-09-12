@@ -23,7 +23,7 @@ interface League {
 }
 
 const Admin: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);  // Ahora se usa
   const [userRole, setUserRole] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fecha: '',
@@ -67,6 +67,18 @@ const Admin: React.FC = () => {
 
     return () => unsubscribe();
   }, [navigate]);
+
+  // Usar currentUser para mostrar detalles del usuario autenticado
+  const renderUserDetails = () => {
+    if (currentUser) {
+      return (
+        <Typography component="p">
+          Usuario autenticado: {currentUser.email}
+        </Typography>
+      );
+    }
+    return null;
+  };
 
   // Obtener las ligas de la base de datos
   useEffect(() => {
@@ -152,9 +164,13 @@ const Admin: React.FC = () => {
     <Box sx={{ padding: 4 }}>
       {userRole === 'Admin' && (
         <>
-          <Typography component="h1" variant="h4" gutterBottom>
+          <Typography component="h1" level="h4" gutterBottom>
             Administrador - Agregar Partido
           </Typography>
+          
+          {/* Render user details */}
+          {renderUserDetails()}
+
           <form onSubmit={handleSubmit}>
             <Box sx={{ marginBottom: 2 }}>
               <TextField

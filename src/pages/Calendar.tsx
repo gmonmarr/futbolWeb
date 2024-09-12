@@ -209,7 +209,6 @@ const FixedSizeGrid = () => {
           <DataGrid 
             rows={rows} 
             columns={columns} 
-            autoHeight // Ajusta automáticamente la altura del grid basado en las filas
             sx={{ overflowY: 'auto' }} // Scroll vertical para ver todos los partidos
           />
         </Box>
