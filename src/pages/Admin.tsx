@@ -7,9 +7,20 @@ import { collection, addDoc, getDocs } from 'firebase/firestore'; // getDocs par
 import { doc, getDoc } from 'firebase/firestore';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
-import Button from '@mui/joy/Button';
+// Cambiar a Button de Material UI
+import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
+// Definir tipos para equipos y ligas
+interface Team {
+  id: string;
+  name: string;
+}
+
+interface League {
+  id: string;
+  name: string;
+}
 
 const Admin: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -22,9 +33,9 @@ const Admin: React.FC = () => {
     cancha: '',
     division: '',
   });
-  const [leagues, setLeagues] = useState([]);  // Estado para las ligas
+  const [leagues, setLeagues] = useState<League[]>([]);  // Estado para las ligas con tipo
   const [selectedLeague, setSelectedLeague] = useState('');  // Estado para la liga seleccionada
-  const [teams, setTeams] = useState([]); // Estado para almacenar los equipos
+  const [teams, setTeams] = useState<Team[]>([]); // Estado para almacenar los equipos con tipo
   const [selectedEquipo1, setSelectedEquipo1] = useState(''); // Estado para el equipo local
   const [selectedEquipo2, setSelectedEquipo2] = useState(''); // Estado para el equipo visitante
   const [selectedHora, setSelectedHora] = useState(''); // Estado para la hora seleccionada
@@ -44,7 +55,7 @@ const Admin: React.FC = () => {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           console.log('Datos del usuario:', userData);  // Agregando depuración
-          setUserRole(userData.role);
+          setUserRole(userData?.role ?? null);
         } else {
           console.log("No se encontraron datos del usuario.");
         }
@@ -64,8 +75,8 @@ const Admin: React.FC = () => {
         const leaguesSnapshot = await getDocs(collection(db, 'leagues')); // Obtener ligas de la colección 'leagues'
         const leaguesData = leaguesSnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
-        }));
+          ...doc.data(),
+        })) as League[];
         setLeagues(leaguesData);
       } catch (error) {
         console.error('Error obteniendo las ligas:', error);
@@ -77,8 +88,8 @@ const Admin: React.FC = () => {
         const teamsSnapshot = await getDocs(collection(db, 'teams')); // Obtener equipos de la colección 'teams'
         const teamsData = teamsSnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
-        }));
+          ...doc.data(),
+        })) as Team[];
         setTeams(teamsData);
       } catch (error) {
         console.error('Error obteniendo los equipos:', error);
@@ -141,7 +152,7 @@ const Admin: React.FC = () => {
     <Box sx={{ padding: 4 }}>
       {userRole === 'Admin' && (
         <>
-          <Typography variant="h4" gutterBottom>
+          <Typography component="h1" variant="h4" gutterBottom>
             Administrador - Agregar Partido
           </Typography>
           <form onSubmit={handleSubmit}>
@@ -158,7 +169,7 @@ const Admin: React.FC = () => {
 
             {/* Dropdown para seleccionar la hora */}
             <Box sx={{ marginBottom: 2 }}>
-              <Typography variant="body1">Selecciona la Hora:</Typography>
+              <Typography component="p">Selecciona la Hora:</Typography>
               <select
                 value={selectedHora}
                 onChange={(e) => setSelectedHora(e.target.value)}
@@ -175,7 +186,7 @@ const Admin: React.FC = () => {
 
             {/* Dropdown para seleccionar equipos */}
             <Box sx={{ marginBottom: 2 }}>
-              <Typography variant="body1">Selecciona el Equipo Local:</Typography>
+              <Typography component="p">Selecciona el Equipo Local:</Typography>
               <select
                 value={selectedEquipo1}
                 onChange={(e) => setSelectedEquipo1(e.target.value)}
@@ -192,7 +203,7 @@ const Admin: React.FC = () => {
             </Box>
 
             <Box sx={{ marginBottom: 2 }}>
-              <Typography variant="body1">Selecciona el Equipo Visitante:</Typography>
+              <Typography component="p">Selecciona el Equipo Visitante:</Typography>
               <select
                 value={selectedEquipo2}
                 onChange={(e) => setSelectedEquipo2(e.target.value)}
@@ -210,7 +221,7 @@ const Admin: React.FC = () => {
 
             {/* Dropdown para seleccionar cancha */}
             <Box sx={{ marginBottom: 2 }}>
-              <Typography variant="body1">Selecciona la Cancha:</Typography>
+              <Typography component="p">Selecciona la Cancha:</Typography>
               <select
                 value={selectedCancha}
                 onChange={(e) => setSelectedCancha(e.target.value)}
@@ -225,7 +236,7 @@ const Admin: React.FC = () => {
 
             {/* Dropdown para seleccionar división */}
             <Box sx={{ marginBottom: 2 }}>
-              <Typography variant="body1">Selecciona la División:</Typography>
+              <Typography component="p">Selecciona la División:</Typography>
               <select
                 value={selectedDivision}
                 onChange={(e) => setSelectedDivision(e.target.value)}
@@ -241,7 +252,7 @@ const Admin: React.FC = () => {
 
             {/* Dropdown para seleccionar una liga */}
             <Box sx={{ marginBottom: 2 }}>
-              <Typography variant="body1">Selecciona una liga:</Typography>
+              <Typography component="p">Selecciona una liga:</Typography>
               <select
                 value={selectedLeague}
                 onChange={(e) => setSelectedLeague(e.target.value)}
