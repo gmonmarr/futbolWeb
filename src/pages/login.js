@@ -27,22 +27,28 @@ function Login() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-
-        // Check if the user has completed their profile (matriculaTEC)
+  
+        // Verifica si el usuario ha completado su perfil (matriculaTEC)
         const userDoc = await getDoc(doc(db, "users", currentUser.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
           if (userData.matriculaTEC) {
             setIsProfileComplete(true);
-            navigate("/team"); // Redirect to /team only if profile is complete
+            // Redirige según el rol del usuario
+            if (userData.role === 'Admin') {
+              navigate("/admin");
+            } else {
+              navigate("/team");
+            }
           } else {
-            setIsProfileComplete(false); // Show profile completion form
+            setIsProfileComplete(false); // Muestra el formulario para completar el perfil
           }
         }
       }
     });
     return () => unsubscribe();
   }, [navigate]);
+  
 
   // Register user
   const handleRegister = async (e) => {
@@ -97,28 +103,34 @@ function Login() {
   };
 
   // Handle login
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      setUser(result.user);
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    setUser(result.user);
 
-      // Check if user exists and has completed profile
-      const userDoc = await getDoc(doc(db, "users", result.user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        if (userData.matriculaTEC) {
-          navigate("/create-team"); // Redirect to create team after login
+    // Verifica si el usuario existe y si ha completado el perfil
+    const userDoc = await getDoc(doc(db, "users", result.user.uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      if (userData.matriculaTEC) {
+        // Redirige a la página de administración si el usuario es un admin
+        if (userData.role === 'Admin') {
+          navigate("/admin");
         } else {
-          setIsProfileComplete(false); // Show form to complete profile
+          navigate("/create-team"); // Redirige a la creación de equipo si no es admin
         }
       } else {
-        setError("User data not found");
+        setIsProfileComplete(false); // Muestra el formulario para completar el perfil
       }
-    } catch (error) {
-      setError(error.message);
+    } else {
+      setError("User data not found");
     }
-  };
+  } catch (error) {
+    setError(error.message);
+  }
+};
+
 
   return (
     <div className="login-container">

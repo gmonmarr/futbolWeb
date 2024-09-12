@@ -7,6 +7,8 @@ import Login from './pages/login.js';
 import Team from './pages/team.tsx';
 import CreateTeam from './pages/CreateTeam.tsx'; // Import the CreateTeam page
 import FindTeam from './pages/FindTeam.tsx'; // Import the FindTeam page
+import Admin from './pages/Admin.tsx'; // Import the Admin page
+import ProtectedRoute from './ProtectedRoute'; // Import the ProtectedRoute component
 import reportWebVitals from './reportWebVitals';
 
 
@@ -21,6 +23,13 @@ root.render(
         <Route path="/team" element={<Team />} />
         <Route path="/create-team" element={<CreateTeam />} /> {/* Add new route */}
         <Route path="/find-team" element={<FindTeam />} /> {/* Add FindTeam route */}
+        
+        {/* Protected route for Admin */}
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <Admin />
+          </ProtectedRoute>
+        } />
 
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>

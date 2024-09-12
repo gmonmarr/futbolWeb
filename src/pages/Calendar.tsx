@@ -5,7 +5,6 @@ import Typography from '@mui/joy/Typography';
 import IconButton from '@mui/joy/IconButton';
 import Stack from '@mui/joy/Stack';
 import Avatar from '@mui/joy/Avatar';
-import Input from '@mui/joy/Input';
 import Button from '@mui/joy/Button';
 import Tooltip from '@mui/joy/Tooltip';
 import Dropdown from '@mui/joy/Dropdown';
@@ -16,8 +15,6 @@ import ListDivider from '@mui/joy/ListDivider';
 import Drawer from '@mui/joy/Drawer';
 import ModalClose from '@mui/joy/ModalClose';
 import DialogTitle from '@mui/joy/DialogTitle';
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
-import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
@@ -94,14 +91,6 @@ const FixedSizeGrid = () => {
             display: { xs: 'none', sm: 'flex' },
           }}
         >
-          <IconButton
-            size="md"
-            variant="outlined"
-            color="neutral"
-            sx={{ display: { xs: 'none', sm: 'inline-flex' }, borderRadius: '50%' }}
-          >
-            <LanguageRoundedIcon />
-          </IconButton>
           <Button
             variant="plain"
             color="neutral"
@@ -136,9 +125,6 @@ const FixedSizeGrid = () => {
         </Stack>
 
         <Box sx={{ display: { xs: 'inline-flex', sm: 'none' } }}>
-          <IconButton variant="plain" color="neutral" onClick={() => setOpen(true)}>
-            <MenuRoundedIcon />
-          </IconButton>
           <Drawer
             sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
             open={open}
@@ -152,140 +138,79 @@ const FixedSizeGrid = () => {
           </Drawer>
         </Box>
 
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: 1.5,
-            alignItems: 'center',
-          }}
-        >
-          <Input
+        <Dropdown>
+          <MenuButton
+            variant="plain"
             size="sm"
-            variant="outlined"
-            placeholder="Search anything…"
-            startDecorator={<SearchRoundedIcon color="primary" />}
-            endDecorator={
-              <IconButton
-                variant="outlined"
-                color="neutral"
-                sx={{ bgcolor: 'background.level1' }}
-              >
-                <Typography level="title-sm" textColor="text.icon">
-                  ⌘ K
-                </Typography>
-              </IconButton>
-            }
-            sx={{
-              alignSelf: 'center',
-              display: {
-                xs: 'none',
-                sm: 'flex',
-              },
-            }}
-          />
-
-          <IconButton
-            size="sm"
-            variant="outlined"
-            color="neutral"
-            sx={{ display: { xs: 'inline-flex', sm: 'none' }, alignSelf: 'center' }}
+            sx={{ maxWidth: '32px', maxHeight: '32px', borderRadius: '9999999px' }}
           >
-            <SearchRoundedIcon />
-          </IconButton>
+            <Avatar
+              src="https://i.pravatar.cc/40?img=2"
+              srcSet="https://i.pravatar.cc/80?img=2"
+              sx={{ maxWidth: '32px', maxHeight: '32px' }}
+            />
+          </MenuButton>
 
-          <Tooltip title="Change theme" variant="outlined">
-            <IconButton
-              size="sm"
-              variant="plain"
-              color="neutral"
-              sx={{ alignSelf: 'center' }}
-              onClick={() => {
-                // Add logic to toggle theme (light/dark mode)
-              }}
-            >
-              {/* Theme toggle icon */}
-              <DarkModeRoundedIcon />
-            </IconButton>
-          </Tooltip>
+          <Menu
+            placement="bottom-end"
+            size="sm"
+            sx={{
+              zIndex: '99999',
+              p: 1,
+              gap: 1,
+              '--ListItem-radius': 'var(--joy-radius-sm)',
+            }}
+          >
+            {userData && (
+              <MenuItem>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar
+                    src="https://i.pravatar.cc/40?img=2"
+                    srcSet="https://i.pravatar.cc/80?img=2"
+                    sx={{ borderRadius: '50%' }}
+                  />
+                  <Box sx={{ ml: 1.5 }}>
+                    <Typography level="title-sm" textColor="text.primary">
+                      {userData.name}
+                    </Typography>
+                    <Typography level="body-xs" textColor="text.tertiary">
+                      {userData.email}
+                    </Typography>
+                  </Box>
+                </Box>
+              </MenuItem>
+            )}
 
-          <Dropdown>
-            <MenuButton
-              variant="plain"
-              size="sm"
-              sx={{ maxWidth: '32px', maxHeight: '32px', borderRadius: '9999999px' }}
-            >
-              <Avatar
-                src="https://i.pravatar.cc/40?img=2"
-                srcSet="https://i.pravatar.cc/80?img=2"
-                sx={{ maxWidth: '32px', maxHeight: '32px' }}
-              />
-            </MenuButton>
+            <ListDivider />
 
-            <Menu
-  placement="bottom-end"
-  size="sm"
-  sx={{
-    zIndex: '99999',
-    p: 1,
-    gap: 1,
-    '--ListItem-radius': 'var(--joy-radius-sm)',
-  }}
->
-  {userData && (
-    <MenuItem>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Avatar
-          src="https://i.pravatar.cc/40?img=2"
-          srcSet="https://i.pravatar.cc/80?img=2"
-          sx={{ borderRadius: '50%' }}
-        />
-        <Box sx={{ ml: 1.5 }}>
-          <Typography level="title-sm" textColor="text.primary">
-            {userData.name}
-          </Typography>
-          <Typography level="body-xs" textColor="text.tertiary">
-            {userData.email}
-          </Typography>
+            <MenuItem>
+              <HelpRoundedIcon />
+              Help
+            </MenuItem>
+
+            <MenuItem onClick={() => navigate('/settings')}>
+              <SettingsRoundedIcon />
+              Settings
+            </MenuItem>
+
+            <ListDivider />
+
+            <MenuItem onClick={handleLogout}>
+              <LogoutRoundedIcon />
+              Log out
+            </MenuItem>
+          </Menu>
+        </Dropdown>
+      </Box>
+
+      {/* Calendar DataGrid */}
+      <Box sx={{ width: '100%', padding: '16px', flexGrow: 1 }}>
+        <Box sx={{ height: 350, width: '100%' }}>
+          <DataGrid rows={rows} columns={columns} pageSize={5} rowsPerPageOptions={[5]} />
         </Box>
       </Box>
-    </MenuItem>
-  )}
-
-  <ListDivider />
-
-  <MenuItem>
-    <HelpRoundedIcon />
-    Help
-  </MenuItem>
-
-  <MenuItem onClick={() => navigate('/settings')}>
-    <SettingsRoundedIcon />
-    Settings
-  </MenuItem>
-
-  <ListDivider />
-
-  <MenuItem onClick={handleLogout}>
-    <LogoutRoundedIcon />
-    Log out
-  </MenuItem>
-</Menu>
-
-{/* Closing elements for the entire component */}
-</Dropdown>
-</Box>
-</Box>
-
-{/* Calendar DataGrid */}
-<Box sx={{ width: '100%', padding: '16px', flexGrow: 1 }}>
-  <Box sx={{ height: 350, width: '100%' }}>
-    <DataGrid rows={rows} columns={columns} pageSize={5} rowsPerPageOptions={[5]} />
-  </Box>
-</Box>
-</Box>
-);
+    </Box>
+  );
 };
 
 export default FixedSizeGrid;
-
