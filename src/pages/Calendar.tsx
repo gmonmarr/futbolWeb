@@ -1,7 +1,9 @@
+// src/pages/Calendar.tsx
+
 import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/joy/Box';
-import Typography from '@mui/joy/Typography';
+import Typography from '@mui/material/Typography';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
@@ -146,6 +148,11 @@ const FixedSizeGrid = () => {
     <>
       <Header /> {/* El header va fuera del Box para que no afecte el tamaño */}
       <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%' }}>
+        {/* Title */}
+        <Typography component="h1" variant="h5" sx={{ textAlign: 'center', margin: '16px 0' }}>
+          Rol de Juegos
+        </Typography>
+
         {/* Dropdowns for filtering */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', width: '100%' }}>
           <Box sx={{ minWidth: '200px' }}>
@@ -179,13 +186,13 @@ const FixedSizeGrid = () => {
   
         {/* Calendar DataGrid */}
         <Box sx={{ flexGrow: 1, padding: '16px', width: '100%' }}>
-          <Box sx={{ height: 600, width: '97.5%' }}>
+          <Box sx={{ height: 500, width: '97.5%' }}>
             <DataGrid rows={filteredRows} columns={columns} sx={{ overflowY: 'auto' }} />
           </Box>
         </Box>
       </Box>
     </>
   );
-}  
+}
 
 export default FixedSizeGrid;
