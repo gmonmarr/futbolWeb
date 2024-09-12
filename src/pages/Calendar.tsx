@@ -34,6 +34,7 @@ interface Partido {
   cancha: string;
   division: string;
   semana: string;
+  estado: string; // Nuevo campo "Estado"
 }
 
 const FixedSizeGrid = () => {
@@ -63,7 +64,8 @@ const FixedSizeGrid = () => {
       const partidosData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-        semana: 'Semana 1', // Valor por defecto para la nueva columna "Semana"
+        semana: 'Semana 1', // Valor por defecto para la columna "Semana"
+        estado: 'Pendiente', // Valor por defecto para la nueva columna "Estado"
       }));
       setRows(partidosData as Partido[]); // Asegurarse de que los datos sean del tipo Partido
     };
@@ -89,6 +91,7 @@ const FixedSizeGrid = () => {
     { field: 'cancha', headerName: 'Cancha', flex: 1 },
     { field: 'division', headerName: 'Division', flex: 1 },
     { field: 'semana', headerName: 'Semana', flex: 1 }, // Nueva columna "Semana"
+    { field: 'estado', headerName: 'Estado', flex: 1 }, // Nueva columna "Estado"
   ];
 
   return (

@@ -9,7 +9,6 @@ import { collection, addDoc, getDocs } from 'firebase/firestore'; // getDocs par
 import { doc, getDoc } from 'firebase/firestore';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
-// Cambiar a Button de Material UI
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
@@ -35,6 +34,7 @@ const Admin: React.FC = () => {
     cancha: '',
     division: '',
     semana: '', // Añadir semana en el formulario
+    estado: '', // Añadir estado en el formulario
   });
   const [leagues, setLeagues] = useState<League[]>([]);  // Estado para las ligas con tipo
   const [selectedLeague, setSelectedLeague] = useState('');  // Estado para la liga seleccionada
@@ -45,6 +45,7 @@ const Admin: React.FC = () => {
   const [selectedCancha, setSelectedCancha] = useState(''); // Estado para la cancha seleccionada
   const [selectedDivision, setSelectedDivision] = useState(''); // Estado para la división seleccionada
   const [selectedSemana, setSelectedSemana] = useState(''); // Estado para la semana seleccionada
+  const [selectedEstado, setSelectedEstado] = useState(''); // Estado para el estado del partido
 
   const navigate = useNavigate();
 
@@ -136,8 +137,8 @@ const Admin: React.FC = () => {
   // Agregar partido a la base de datos
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedLeague || !selectedEquipo1 || !selectedEquipo2 || !selectedHora || !selectedCancha || !selectedDivision || !selectedSemana) {
-      alert('Por favor selecciona una liga, una hora, una cancha, una división, una semana y ambos equipos.');
+    if (!selectedLeague || !selectedEquipo1 || !selectedEquipo2 || !selectedHora || !selectedCancha || !selectedDivision || !selectedSemana || !selectedEstado) {
+      alert('Por favor selecciona una liga, una hora, una cancha, una división, una semana, el estado del partido y ambos equipos.');
       return;
     }
     try {
@@ -150,9 +151,10 @@ const Admin: React.FC = () => {
         division: selectedDivision, // Utiliza la división seleccionada
         liga: selectedLeague,  // Añadir la liga seleccionada
         semana: selectedSemana, // Añadir la semana seleccionada
+        estado: selectedEstado, // Añadir el estado del partido
       });
       alert('Partido agregado con éxito.');
-      setFormData({ fecha: '', hora: '', equipo1: '', equipo2: '', cancha: '', division: '' , semana: '' }); // Resetear el formulario
+      setFormData({ fecha: '', hora: '', equipo1: '', equipo2: '', cancha: '', division: '', semana: '', estado: '' }); // Resetear el formulario
       setSelectedLeague(''); // Resetear la liga seleccionada
       setSelectedEquipo1(''); // Resetear el equipo local
       setSelectedEquipo2(''); // Resetear el equipo visitante
@@ -160,6 +162,7 @@ const Admin: React.FC = () => {
       setSelectedCancha(''); // Resetear la cancha seleccionada
       setSelectedDivision(''); // Resetear la división seleccionada
       setSelectedSemana(''); // Resetear la semana seleccionada
+      setSelectedEstado(''); // Resetear el estado del partido
     } catch (error) {
       console.error('Error agregando partido:', error);
       alert('Error agregando partido. Intenta de nuevo.');
@@ -288,6 +291,23 @@ const Admin: React.FC = () => {
               </select>
             </Box>
 
+            {/* Dropdown para seleccionar el estado del partido */}
+            <Box sx={{ marginBottom: 2 }}>
+              <Typography component="p">Selecciona el Estado del Partido:</Typography>
+              <select
+                value={selectedEstado}
+                onChange={(e) => setSelectedEstado(e.target.value)}
+                required
+                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+              >
+                <option value="">Seleccione un estado</option>
+                <option value="Jugado">Jugado</option>
+                <option value="Cancelado">Cancelado</option>
+                <option value="Reprogramado">Reprogramado</option>
+                <option value="Por Jugar">Por Jugar</option>
+              </select>
+            </Box>
+
             {/* Dropdown para seleccionar una liga */}
             <Box sx={{ marginBottom: 2 }}>
               <Typography component="p">Selecciona una liga:</Typography>
@@ -305,8 +325,6 @@ const Admin: React.FC = () => {
                 ))}
               </select>
             </Box>
-
-            
 
             <Button variant="contained" color="primary" type="submit">
               Agregar Partido
