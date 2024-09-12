@@ -13,9 +13,9 @@ function Root(props: BoxProps) {
           bgcolor: 'background.appBody',
           display: 'grid',
           gridTemplateColumns: {
-            xs: '1fr',
-            sm: 'minmax(64px, 200px) minmax(450px, 1fr)',
-            md: 'minmax(160px, 300px) minmax(300px, 500px) minmax(500px, 1fr)',
+            xs: '1fr', // Para pantallas pequeñas, una columna que ocupe todo el espacio.
+            sm: 'minmax(64px, 200px) 1fr', // Para pantallas medianas, una columna fija a la izquierda y el contenido principal con 1fr.
+            md: 'minmax(160px, 300px) 1fr', // Para pantallas más grandes, una columna más ancha a la izquierda y el contenido principal ocupando el resto.
           },
           gridTemplateRows: '64px 1fr',
           minHeight: '100vh',
@@ -25,6 +25,7 @@ function Root(props: BoxProps) {
     />
   );
 }
+
 
 function Header(props: BoxProps) {
   return (
