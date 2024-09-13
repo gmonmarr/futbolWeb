@@ -220,7 +220,7 @@ const Admin: React.FC = () => {
           {userRole === 'Admin' && (
             <>
               <Typography component="h1" level="h4" gutterBottom>
-                Admin - Add Match
+                Admin - Agregar Partido
               </Typography>
               
               {renderUserDetails()}
@@ -229,7 +229,7 @@ const Admin: React.FC = () => {
                 {/* Date */}
                 <Box sx={{ marginBottom: 2 }}>
                   <TextField
-                    label="Date"
+                    label="Fecha"
                     name="fecha"
                     value={formData.fecha}
                     onChange={handleChange}
@@ -240,14 +240,14 @@ const Admin: React.FC = () => {
 
                 {/* Time */}
                 <Box sx={{ marginBottom: 2 }}>
-                  <Typography component="p">Select Time:</Typography>
+                  <Typography component="p">Hora:</Typography>
                   <select
                     value={selectedHora}
                     onChange={(e) => setSelectedHora(e.target.value)}
                     required
                     style={{ width: '100%', padding: '8px', marginTop: '10px' }}
                   >
-                    <option value="">Select Time</option>
+                    <option value="">Seleciona Hora</option>
                     <option value="17:30">17:30</option>
                     <option value="18:30">18:30</option>
                     <option value="19:30">19:30</option>
@@ -257,7 +257,7 @@ const Admin: React.FC = () => {
 
                 {/* League */}
                 <Box sx={{ marginBottom: 2 }}>
-                  <Typography component="p">Select League:</Typography>
+                  <Typography component="p">Liga:</Typography>
                   <select
                     value={selectedLeague}
                     onChange={(e) => {
@@ -269,7 +269,7 @@ const Admin: React.FC = () => {
                     required
                     style={{ width: '100%', padding: '8px', marginTop: '10px' }}
                   >
-                    <option value="">Select a League</option>
+                    <option value="">Seleciona una Liga</option>
                     {leagues.map((league) => (
                       <option key={league.id} value={league.id}>
                         {league.leagueName}
@@ -280,14 +280,14 @@ const Admin: React.FC = () => {
 
                 {/* Division */}
                 <Box sx={{ marginBottom: 2 }}>
-                  <Typography component="p">Select Division:</Typography>
+                  <Typography component="p">Seleciona División:</Typography>
                   <select
                     value={selectedDivision}
                     onChange={(e) => setSelectedDivision(e.target.value)}
                     required
                     style={{ width: '100%', padding: '8px', marginTop: '10px' }}
                   >
-                    <option value="">Select a Division</option>
+                    <option value="">Seleciona una División</option>
                     {divisions.map((division) => (
                       <option key={division.id} value={division.id}>
                         {division.divisionName}
@@ -298,14 +298,14 @@ const Admin: React.FC = () => {
 
                 {/* Home Team */}
                 <Box sx={{ marginBottom: 2 }}>
-                  <Typography component="p">Select Home Team:</Typography>
+                  <Typography component="p">Seleciona Equipo Local:</Typography>
                   <select
                     value={selectedEquipo1}
                     onChange={(e) => setSelectedEquipo1(e.target.value)}
                     required
                     style={{ width: '100%', padding: '8px', marginTop: '10px' }}
                   >
-                    <option value="">Select a team</option>
+                    <option value="">Seleciona Equipo</option>
                     {teams
                       .filter((team) => team.id !== selectedEquipo2) // Exclude the away team
                       .map((team) => (
@@ -318,14 +318,14 @@ const Admin: React.FC = () => {
 
                 {/* Away Team */}
                 <Box sx={{ marginBottom: 2 }}>
-                  <Typography component="p">Select Away Team:</Typography>
+                  <Typography component="p">Seleciona Equipo Visitante:</Typography>
                   <select
                     value={selectedEquipo2}
                     onChange={(e) => setSelectedEquipo2(e.target.value)}
                     required
                     style={{ width: '100%', padding: '8px', marginTop: '10px' }}
                   >
-                    <option value="">Select a team</option>
+                    <option value="">Seleciona Equipo</option>
                     {teams
                       .filter((team) => team.id !== selectedEquipo1) // Exclude the home team
                       .map((team) => (
@@ -338,14 +338,14 @@ const Admin: React.FC = () => {
 
                 {/* Field */}
                 <Box sx={{ marginBottom: 2 }}>
-                  <Typography component="p">Select Field:</Typography>
+                  <Typography component="p">Cancha:</Typography>
                   <select
                     value={selectedCancha}
                     onChange={(e) => setSelectedCancha(e.target.value)}
                     required
                     style={{ width: '100%', padding: '8px', marginTop: '10px' }}
                   >
-                    <option value="">Select Field</option>
+                    <option value="">Seleciona Cancha</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="2">3</option>
@@ -355,39 +355,39 @@ const Admin: React.FC = () => {
 
                 {/* Week */}
                 <Box sx={{ marginBottom: 2 }}>
-                  <Typography component="p">Select Week:</Typography>
+                  <Typography component="p">Semana:</Typography>
                   <select
                     value={selectedSemana}
                     onChange={(e) => setSelectedSemana(e.target.value)}
                     required
                     style={{ width: '100%', padding: '8px', marginTop: '10px' }}
                   >
-                    <option value="">Select Week</option>
+                    <option value="">Seleciona Semana</option>
                     {Array.from({ length: 18 }, (_, i) => (
-                      <option key={i + 1} value={`Week ${i + 1}`}>{`Week ${i + 1}`}</option>
+                      <option key={i + 1} value={`Semana ${i + 1}`}>{`Semana ${i + 1}`}</option>
                     ))}
                   </select>
                 </Box>
 
                 {/* Match Status */}
                 <Box sx={{ marginBottom: 2 }}>
-                  <Typography component="p">Select Match Status:</Typography>
+                  <Typography component="p">Estado:</Typography>
                   <select
                     value={selectedEstado}
                     onChange={(e) => setSelectedEstado(e.target.value)}
                     required
                     style={{ width: '100%', padding: '8px', marginTop: '10px' }}
                   >
-                    <option value="">Select Status</option>
-                    <option value="Played">Played</option>
-                    <option value="Canceled">Canceled</option>
-                    <option value="Rescheduled">Rescheduled</option>
-                    <option value="To Be Played">To Be Played</option>
+                    <option value="">Seleciona Estado</option>
+                    <option value="Played">Jugado</option>
+                    <option value="Canceled">Cancelado</option>
+                    <option value="Rescheduled">Reprogramado</option>
+                    <option value="To Be Played">Por Jugar</option>
                   </select>
                 </Box>
 
                 <Button variant="contained" color="primary" type="submit">
-                  Add Match
+                  Agregar Partido
                 </Button>
               </form>
             </>

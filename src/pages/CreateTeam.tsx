@@ -167,7 +167,7 @@ export default function CreateTeam() {
                   component="h1" 
                   sx={{ mb: 3, textAlign: 'center', fontWeight: 'bold' }}
                 >
-                  Create a New Team
+                  Crear Nuevo Equipo
                 </Typography>
 
                 <TextField
@@ -180,11 +180,11 @@ export default function CreateTeam() {
                 />
 
                 <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel>Select a League</InputLabel>
+                  <InputLabel>Selecciona Liga</InputLabel>
                   <Select
                     value={selectedLeague}
                     onChange={(e) => setSelectedLeague(e.target.value)}
-                    label="Select a League"
+                    label="Selecciona una Liga"
                     required
                   >
                     <MenuItem value="">
@@ -200,11 +200,11 @@ export default function CreateTeam() {
 
                 {selectedLeague && (
                   <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>Select a Division</InputLabel>
+                    <InputLabel>Selecciona una División</InputLabel>
                     <Select
                       value={selectedDivision}
                       onChange={(e) => setSelectedDivision(e.target.value)}
-                      label="Select a Division"
+                      label="Selecciona una División"
                       required
                     >
                       <MenuItem value="">

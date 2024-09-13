@@ -11,13 +11,10 @@ import Dropdown from '@mui/joy/Dropdown';
 import Menu from '@mui/joy/Menu';
 import MenuButton from '@mui/joy/MenuButton';
 import MenuItem from '@mui/joy/MenuItem';
-import ListDivider from '@mui/joy/ListDivider';
 import Drawer from '@mui/joy/Drawer';
 import ModalClose from '@mui/joy/ModalClose';
 import DialogTitle from '@mui/joy/DialogTitle';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
-import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded'; // Importa el ícono de Persona
@@ -111,7 +108,7 @@ export default function Header() {
               onClick={() => navigate('/admin')}
               sx={{ alignSelf: 'center' }}
             >
-              Add Match
+              Agregar Partido
             </Button>
             <Button
               variant="plain"
@@ -119,7 +116,7 @@ export default function Header() {
               onClick={() => navigate('/liga-division')}
               sx={{ alignSelf: 'center' }}
             >
-              Add League/Division
+              Agregar Liga/División
             </Button>
           </>
         )}

@@ -53,7 +53,7 @@ export default function Navigation() {
               <ListItemDecorator>
                 <GroupAddRoundedIcon fontSize="small" />
               </ListItemDecorator>
-              <ListItemContent>Create Team</ListItemContent>
+              <ListItemContent>Crear Equipo</ListItemContent>
             </ListItemButton>
           </ListItem>
 
@@ -62,7 +62,7 @@ export default function Navigation() {
               <ListItemDecorator>
                 <SearchRoundedIcon fontSize="small" />
               </ListItemDecorator>
-              <ListItemContent>Find Team</ListItemContent>
+              <ListItemContent>Buscar Equipo</ListItemContent>
             </ListItemButton>
           </ListItem>
 

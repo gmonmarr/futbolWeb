@@ -1,10 +1,9 @@
-// src/pages/Calendar.tsx
-
 import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/material/Typography';
 import EditIcon from '@mui/icons-material/Edit';
+import { TextField, MenuItem, Select } from '@mui/material'; // Para campos editables
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
@@ -30,7 +29,7 @@ const FixedSizeGrid = () => {
   const [rows, setRows] = React.useState<Partido[]>([]);
   const [selectedDivision, setSelectedDivision] = React.useState('');
   const [selectedSemana, setSelectedSemana] = React.useState('');
-  const [editingState, setEditingState] = React.useState<{ id: string; estado: string } | null>(null);
+  const [editingState, setEditingState] = React.useState<{ id: string; field: string; value: string } | null>(null);
 
   // Fetch user data from Firestore
   React.useEffect(() => {
@@ -68,65 +67,297 @@ const FixedSizeGrid = () => {
     );
   });
 
-  // Manejar el cambio de estado
-  const handleChangeEstado = async (id: string, newEstado: string) => {
+  // Manejar el cambio de cualquier campo editable
+  const handleChangeField = async (id: string, field: string, value: string) => {
     try {
       const partidoRef = doc(db, 'partidos', id);
-      await updateDoc(partidoRef, { estado: newEstado });
+      await updateDoc(partidoRef, { [field]: value });
       setRows((prevRows) =>
-        prevRows.map((row) => (row.id === id ? { ...row, estado: newEstado } : row))
+        prevRows.map((row) => (row.id === id ? { ...row, [field]: value } : row))
       );
       setEditingState(null); // Salir del modo de edición
     } catch (error) {
-      console.error('Error updating estado:', error);
+      console.error(`Error updating ${field}:`, error);
     }
   };
 
   const columns = [
-    { field: 'fecha', headerName: 'Fecha', flex: 1 },
-    { field: 'hora', headerName: 'Hora', flex: 1 },
-    { field: 'equipo1', headerName: 'Local', flex: 1 },
-    { field: 'equipo2', headerName: 'Visitante', flex: 1 },
-    { field: 'cancha', headerName: 'Cancha', flex: 1 },
-    { field: 'division', headerName: 'Division', flex: 1 },
-    { field: 'semana', headerName: 'Semana', flex: 1 },
+    {
+      field: 'fecha',
+      headerName: 'Fecha',
+      flex: 1,
+      renderCell: (params: any) => {
+        const isEditing = editingState?.id === params.row.id && editingState?.field === 'fecha';
+        const isAdmin = userData?.role === 'Admin';
+    
+        return isEditing ? (
+          <TextField
+            type="text"
+            value={editingState?.value || params.value}
+            onChange={(e) => setEditingState(editingState ? { ...editingState, value: e.target.value } : null)} // Protegemos el acceso a editingState
+            onBlur={(e) => handleChangeField(params.row.id, 'fecha', e.target.value)} // Mantiene cualquier valor, incluidos espacios
+            fullWidth
+          />
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Typography sx={{ flexGrow: 1 }}>{params.value}</Typography>
+            {isAdmin && (
+              <EditIcon
+                onClick={() => setEditingState({ id: params.row.id, field: 'fecha', value: params.value })}
+                sx={{
+                  fontSize: '1.2rem',
+                  color: 'gray',
+                  cursor: 'pointer',
+                  marginLeft: '8px',
+                }}
+              />
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'hora',
+      headerName: 'Hora',
+      flex: 1,
+      renderCell: (params: any) => {
+        const isEditing = editingState?.id === params.row.id && editingState?.field === 'hora';
+        const isAdmin = userData?.role === 'Admin';
+
+        return isEditing ? (
+          <TextField
+            type="time"
+            value={editingState?.value || params.value}
+            onChange={(e) => setEditingState(editingState ? { ...editingState, value: e.target.value } : null)} // Protegemos el acceso a editingState
+            onBlur={(e) => handleChangeField(params.row.id, 'hora', e.target.value)}
+            fullWidth
+          />
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Typography sx={{ flexGrow: 1 }}>{params.value}</Typography>
+            {isAdmin && (
+              <EditIcon
+                onClick={() => setEditingState({ id: params.row.id, field: 'hora', value: params.value })}
+                sx={{
+                  fontSize: '1.2rem',
+                  color: 'gray',
+                  cursor: 'pointer',
+                  marginLeft: '8px',
+                }}
+              />
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'equipo1',
+      headerName: 'Local',
+      flex: 1,
+      renderCell: (params: any) => {
+        const isEditing = editingState?.id === params.row.id && editingState?.field === 'equipo1';
+        const isAdmin = userData?.role === 'Admin';
+
+        return isEditing ? (
+          <TextField
+            value={editingState?.value || params.value}
+            onChange={(e) => setEditingState(editingState ? { ...editingState, value: e.target.value } : null)} // Protegemos el acceso a editingState
+            onBlur={(e) => handleChangeField(params.row.id, 'equipo1', e.target.value)}
+            fullWidth
+          />
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Typography sx={{ flexGrow: 1 }}>{params.value}</Typography>
+            {isAdmin && (
+              <EditIcon
+                onClick={() => setEditingState({ id: params.row.id, field: 'equipo1', value: params.value })}
+                sx={{
+                  fontSize: '1.2rem',
+                  color: 'gray',
+                  cursor: 'pointer',
+                  marginLeft: '8px',
+                }}
+              />
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'equipo2',
+      headerName: 'Visitante',
+      flex: 1,
+      renderCell: (params: any) => {
+        const isEditing = editingState?.id === params.row.id && editingState?.field === 'equipo2';
+        const isAdmin = userData?.role === 'Admin';
+
+        return isEditing ? (
+          <TextField
+            value={editingState?.value || params.value}
+            onChange={(e) => setEditingState(editingState ? { ...editingState, value: e.target.value } : null)} // Protegemos el acceso a editingState
+            onBlur={(e) => handleChangeField(params.row.id, 'equipo2', e.target.value)}
+            fullWidth
+          />
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Typography sx={{ flexGrow: 1 }}>{params.value}</Typography>
+            {isAdmin && (
+              <EditIcon
+                onClick={() => setEditingState({ id: params.row.id, field: 'equipo2', value: params.value })}
+                sx={{
+                  fontSize: '1.2rem',
+                  color: 'gray',
+                  cursor: 'pointer',
+                  marginLeft: '8px',
+                }}
+              />
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'cancha',
+      headerName: 'Cancha',
+      flex: 1,
+      renderCell: (params: any) => {
+        const isEditing = editingState?.id === params.row.id && editingState?.field === 'cancha';
+        const isAdmin = userData?.role === 'Admin';
+
+        return isEditing ? (
+          <TextField
+            value={editingState?.value || params.value}
+            onChange={(e) => setEditingState(editingState ? { ...editingState, value: e.target.value } : null)} // Protegemos el acceso a editingState
+            onBlur={(e) => handleChangeField(params.row.id, 'cancha', e.target.value)}
+            fullWidth
+          />
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Typography sx={{ flexGrow: 1 }}>{params.value}</Typography>
+            {isAdmin && (
+              <EditIcon
+                onClick={() => setEditingState({ id: params.row.id, field: 'cancha', value: params.value })}
+                sx={{
+                  fontSize: '1.2rem',
+                  color: 'gray',
+                  cursor: 'pointer',
+                  marginLeft: '8px',
+                }}
+              />
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'division',
+      headerName: 'Division',
+      flex: 1,
+      renderCell: (params: any) => {
+        const isEditing = editingState?.id === params.row.id && editingState?.field === 'division';
+        const isAdmin = userData?.role === 'Admin';
+
+        return isEditing ? (
+          <Select
+            value={editingState?.value || params.value}
+            onChange={(e) => setEditingState(editingState ? { id: params.row.id, field: 'division', value: e.target.value } : null)} // Protegemos el acceso a editingState
+            onBlur={() => handleChangeField(params.row.id, 'division', editingState?.value || params.value)}
+            fullWidth
+          >
+            <MenuItem value="Varonil 1 Fuerza">Varonil 1 Fuerza</MenuItem>
+            <MenuItem value="Varonil 2 Fuerza">Varonil 2 Fuerza</MenuItem>
+            <MenuItem value="Feminil Unica">Feminil Unica</MenuItem>
+          </Select>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Typography sx={{ flexGrow: 1 }}>{params.value}</Typography>
+            {isAdmin && (
+              <EditIcon
+                onClick={() => setEditingState({ id: params.row.id, field: 'division', value: params.value })}
+                sx={{
+                  fontSize: '1.2rem',
+                  color: 'gray',
+                  cursor: 'pointer',
+                  marginLeft: '8px',
+                }}
+              />
+            )}
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'semana',
+      headerName: 'Semana',
+      flex: 1,
+      renderCell: (params: any) => {
+        const isEditing = editingState?.id === params.row.id && editingState?.field === 'semana';
+        const isAdmin = userData?.role === 'Admin';
+
+        return isEditing ? (
+          <Select
+            value={editingState?.value || params.value}
+            onChange={(e) => setEditingState(editingState ? { id: params.row.id, field: 'semana', value: e.target.value } : null)} // Protegemos el acceso a editingState
+            onBlur={() => handleChangeField(params.row.id, 'semana', editingState?.value || params.value)}
+            fullWidth
+          >
+            {Array.from({ length: 18 }, (_, i) => (
+              <MenuItem key={i + 1} value={`Semana ${i + 1}`}>
+                {`Semana ${i + 1}`}
+              </MenuItem>
+            ))}
+          </Select>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Typography sx={{ flexGrow: 1 }}>{params.value}</Typography>
+            {isAdmin && (
+              <EditIcon
+                onClick={() => setEditingState({ id: params.row.id, field: 'semana', value: params.value })}
+                sx={{
+                  fontSize: '1.2rem',
+                  color: 'gray',
+                  cursor: 'pointer',
+                  marginLeft: '8px',
+                }}
+              />
+            )}
+          </Box>
+        );
+      },
+    },
     {
       field: 'estado',
       headerName: 'Estado',
       flex: 1,
       renderCell: (params: any) => {
-        const isEditing = editingState?.id === params.row.id;
+        const isEditing = editingState?.id === params.row.id && editingState?.field === 'estado';
         const isAdmin = userData?.role === 'Admin';
 
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', paddingY: '12px' }}>
-            {isEditing ? (
-              <select
-                value={editingState?.estado || ''}
-                onChange={(e) => setEditingState({ id: params.row.id, estado: e.target.value })}
-                onBlur={() => handleChangeEstado(params.row.id, editingState?.estado || '')}
-                style={{ width: '100%', padding: '8px' }}
-              >
-                <option value="Jugado">Jugado</option>
-                <option value="Cancelado">Cancelado</option>
-                <option value="Reprogramado">Reprogramado</option>
-                <option value="Por Jugar">Por Jugar</option>
-              </select>
-            ) : (
-              <>
-                <Typography sx={{ flexGrow: 1 }}>{params.value}</Typography>
-                {isAdmin && (
-                  <EditIcon
-                    onClick={() => setEditingState({ id: params.row.id, estado: params.value })}
-                    sx={{
-                      fontSize: '1rem',
-                      color: 'gray',
-                      cursor: 'pointer',
-                      marginLeft: '8px',
-                    }}
-                  />
-                )}
-              </>
+        return isEditing ? (
+          <Select
+            value={editingState?.value || params.value}
+            onChange={(e) => setEditingState(editingState ? { id: params.row.id, field: 'estado', value: e.target.value } : null)} // Protegemos el acceso a editingState
+            onBlur={() => handleChangeField(params.row.id, 'estado', editingState?.value || params.value)}
+            fullWidth
+          >
+            <MenuItem value="Jugado">Jugado</MenuItem>
+            <MenuItem value="Cancelado">Cancelado</MenuItem>
+            <MenuItem value="Reprogramado">Reprogramado</MenuItem>
+            <MenuItem value="Por Jugar">Por Jugar</MenuItem>
+          </Select>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Typography sx={{ flexGrow: 1 }}>{params.value}</Typography>
+            {isAdmin && (
+              <EditIcon
+                onClick={() => setEditingState({ id: params.row.id, field: 'estado', value: params.value })}
+                sx={{
+                  fontSize: '1.2rem',
+                  color: 'gray',
+                  cursor: 'pointer',
+                  marginLeft: '8px',
+                }}
+              />
             )}
           </Box>
         );

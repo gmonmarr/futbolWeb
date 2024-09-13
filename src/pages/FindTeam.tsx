@@ -201,7 +201,7 @@ export default function FindTeam() {
           <Box sx={{ backgroundColor: '#f0f4f8', padding: '16px', borderRadius: '8px', 
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',  marginBottom: '24px' }}>
                 <Typography component="h1" variant="h4" sx={{ color: 'text.primary', fontWeight: 'bold' }}>
-                  Find a Team in a League
+                  Buscar Equipo en una Liga
                 </Typography>
           </Box>
 
@@ -218,7 +218,7 @@ export default function FindTeam() {
                 required
                 style={{ marginBottom: '10px', padding: '5px', minWidth: '200px' }}
               >
-                <option value="">Select a League</option>
+                <option value="">Selecciona Liga</option>
                 {leagues.map((league) => (
                   <option key={league.id} value={league.id}>
                     {league.leagueName}
@@ -233,7 +233,7 @@ export default function FindTeam() {
                   required
                   style={{ marginBottom: '10px', padding: '5px', minWidth: '200px' }}
                 >
-                  <option value="">Select a Division</option>
+                  <option value="">Selecciona División</option>
                   {divisions.map((division) => (
                     <option key={division.id} value={division.id}>
                       {division.divisionName}
@@ -246,7 +246,7 @@ export default function FindTeam() {
             {/* Search row */}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TextField
-                label="Search by Team Name"
+                label="Buscar por Nombre de Equipo"
                 variant="outlined"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -254,7 +254,7 @@ export default function FindTeam() {
                 sx={{ mr: 1 }}
               />
               <Button variant="contained" color="primary" onClick={handleSearch} size="small">
-                Search
+                Buscar
               </Button>
 
               {searchPerformed && (
@@ -265,7 +265,7 @@ export default function FindTeam() {
                   size="small"
                   sx={{ ml: 1 }}
                 >
-                  Clear Search
+                  Limpiar Busqueda
                 </Button>
               )}
             </Box>
@@ -277,7 +277,7 @@ export default function FindTeam() {
                     <Card sx={{ minHeight: '140px' }}>
                       <CardContent>
                         <Typography variant="subtitle1">{team.teamName}</Typography>
-                        <Typography variant="body2">Leader: {team.leaderName}</Typography>
+                        <Typography variant="body2">Capitán: {team.leaderName}</Typography>
                         <Button
                           variant="contained"
                           color="primary"
@@ -295,7 +295,7 @@ export default function FindTeam() {
               </Grid>
             ) : (
               <Typography variant="body2" sx={{ mt: 2 }}>
-                No teams available in this division.
+                No hay Equipos Disponibles en esta División.
               </Typography>
             )}
 

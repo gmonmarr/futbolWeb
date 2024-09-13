@@ -100,7 +100,7 @@ const LigaDivision: React.FC = () => {
   const handleCreateLeague = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newLeagueName) {
-      alert('Please enter a league name.');
+      alert('Nombre de Liga.');
       return;
     }
 
@@ -111,7 +111,7 @@ const LigaDivision: React.FC = () => {
         createdAt: serverTimestamp(),
       });
 
-      alert('League created successfully.');
+      alert('Liga Creada.');
       setNewLeagueName('');
       // Refresh the league list after creating a new league
       const leaguesSnapshot = await getDocs(collection(db, 'leagues'));
@@ -130,7 +130,7 @@ const LigaDivision: React.FC = () => {
   const handleCreateDivision = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDivisionName || !selectedLeague) {
-      alert('Please select a league and enter a division name.');
+      alert('Selecciona una Liga y Division.');
       return;
     }
 
@@ -140,7 +140,7 @@ const LigaDivision: React.FC = () => {
         createdAt: serverTimestamp(),
       });
 
-      alert('Division created successfully.');
+      alert('Division Creada.');
       setNewDivisionName('');
       // Refresh the division list after creating a new division
       const divisionsSnapshot = await getDocs(collection(db, `leagues/${selectedLeague}/divisions`));
@@ -179,14 +179,14 @@ const LigaDivision: React.FC = () => {
       {userRole === 'Admin' && (
         <>
           <Typography component="h1" level="h4" gutterBottom>
-            Admin - Create League and Division
+            Admin - Crear Liga y División
           </Typography>
 
           {/* Create a new league */}
           <form onSubmit={handleCreateLeague}>
             <Box sx={{ marginBottom: 2 }}>
               <TextField
-                label="New League Name"
+                label="Nombre de Nueva Liga"
                 name="leagueName"
                 value={newLeagueName}
                 onChange={(e) => setNewLeagueName(e.target.value)}
@@ -195,25 +195,25 @@ const LigaDivision: React.FC = () => {
               />
             </Box>
             <Button variant="contained" color="primary" type="submit">
-              Create League
+              Crear Liga
             </Button>
           </form>
 
           {/* Select a league and create a new division */}
           <Box sx={{ marginTop: 4 }}>
             <Typography component="h2" level="h4" gutterBottom>
-              Add Division to a League
+              Agregar División a la Liga
             </Typography>
             <form onSubmit={handleCreateDivision}>
               <Box sx={{ marginBottom: 2 }}>
-                <Typography component="p">Select League:</Typography>
+                <Typography component="p">Seleciona Liga:</Typography>
                 <select
                   value={selectedLeague}
                   onChange={(e) => setSelectedLeague(e.target.value)}
                   required
                   style={{ width: '100%', padding: '8px', marginTop: '10px' }}
                 >
-                  <option value="">Select a League</option>
+                  <option value="">Seleciona Liga</option>
                   {leagues.map((league) => (
                     <option key={league.id} value={league.id}>
                       {league.leagueName}
@@ -224,7 +224,7 @@ const LigaDivision: React.FC = () => {
 
               <Box sx={{ marginBottom: 2 }}>
                 <TextField
-                  label="New Division Name"
+                  label="Nombre de Nueva División"
                   name="divisionName"
                   value={newDivisionName}
                   onChange={(e) => setNewDivisionName(e.target.value)}
@@ -234,7 +234,7 @@ const LigaDivision: React.FC = () => {
               </Box>
 
               <Button variant="contained" color="primary" type="submit">
-                Create Division
+                Crear División
               </Button>
             </form>
 
@@ -251,7 +251,7 @@ const LigaDivision: React.FC = () => {
                     </Typography>
                   ))
                 ) : (
-                  <Typography component="p">No divisions available.</Typography>
+                  <Typography component="p">No Divisiones Disponibles.</Typography>
                 )}
               </Box>
             )}

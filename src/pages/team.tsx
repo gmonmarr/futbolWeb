@@ -184,7 +184,7 @@ export default function TeamExample() {
           <Box sx={{ backgroundColor: '#f0f4f8', padding: '16px', borderRadius: '8px', 
             boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',  marginBottom: '24px' }}>
               <Typography level="h1" textColor="text.primary" component="h1">
-                {userData ? `Welcome, ${userData.name || 'User'}` : 'Loading...'}
+                {userData ? `Bienvenido, ${userData.name || 'User'}` : 'Loading...'}
               </Typography>
           </Box>
 
@@ -195,14 +195,14 @@ export default function TeamExample() {
                   {/* Left side - Teams */}
                   <Box sx={{ width: '30%', paddingLeft: '32px' }}>
                     <Typography level="title-md" textColor="text.secondary" component="p" fontWeight={700}>
-                      Teams You Lead:
+                      Equipos que lideras:
                     </Typography>
 
                     {teams.length > 0 ? (
                       teams.map((team) => (
                         <Box key={team.id} sx={{ mt: 2, textAlign: 'left' }}>
                           <Typography level="body-md" component="p">
-                            Team: {team.teamName}
+                            Equipo: {team.teamName}
                           </Typography>
                           <Button
                             variant="solid"
@@ -227,7 +227,7 @@ export default function TeamExample() {
                       ))
                     ) : (
                       <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
-                        You are not the leader of any teams.
+                        No eres Capitán de Ningun Equipo.
                       </Typography>
                     )}
                   </Box>
