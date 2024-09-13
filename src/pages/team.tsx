@@ -12,7 +12,7 @@ import './team.css';
 
 // Import Firebase services
 import { auth, db } from '../firebase';
-import { collection, query, where, getDocs, doc, getDoc, updateDoc, arrayRemove } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 
 export default function TeamExample() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -23,7 +23,7 @@ export default function TeamExample() {
   const [requestingUsers, setRequestingUsers] = React.useState<any[]>([]); // Requesting user details
   const [selectedTeamId, setSelectedTeamId] = React.useState<string | null>(null); // Stores selected team ID for toggling
   const [teamPlayers, setTeamPlayers] = React.useState<any[]>([]); // Players in the selected team
-  const [showPlayers, setShowPlayers] = React.useState<boolean>(false); // Controls showing players
+  const [showPlayersTeamId, setShowPlayersTeamId] = React.useState<string | null>(null); // Track which team's players are being shown
 
   // Get the current user and load their data and team data
   React.useEffect(() => {
@@ -44,8 +44,6 @@ export default function TeamExample() {
           const teamSnapshot = await getDocs(q);
           const teamsList = teamSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setTeams(teamsList); // Store teams where the user is the leader
-        } else {
-          console.error('User data not found');
         }
       } else {
         setCurrentUser(null);
@@ -97,22 +95,64 @@ export default function TeamExample() {
           return playerDoc.exists() ? { id: playerId, ...playerDoc.data() } : null;
         });
         let players = await Promise.all(playerPromises);
-        players = players.filter((player) => player !== null); // Filter out null values
-        players = players.filter((player) => player.id !== currentUser?.uid); // Filter out current user
+        players = players.filter((player) => player !== null && player.id !== currentUser?.uid); // Exclude current user
         setTeamPlayers(players);
-        setShowPlayers(!showPlayers); // Toggle the display of players
+        
+        // Toggle display of players only for the selected team
+        if (showPlayersTeamId === teamId) {
+          setShowPlayersTeamId(null); // Hide players if already visible
+        } else {
+          setShowPlayersTeamId(teamId); // Show players for the selected team
+        }
       }
     } catch (error) {
       console.error('Error fetching players:', error);
     }
   };
 
+  // Handle accepting a join request
+  const handleAcceptRequest = async (teamId: string, userId: string) => {
+    try {
+      // Update the team document to add the user to the players array and remove from joinRequests
+      const teamDocRef = doc(db, 'teams', teamId);
+      await updateDoc(teamDocRef, {
+        players: arrayUnion(userId),
+        joinRequests: arrayRemove(userId),
+      });
+
+      // Remove the user from the requestingUsers array locally
+      setRequestingUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+    } catch (error) {
+      console.error("Error accepting join request:", error);
+    }
+  };
+
+  // Handle denying a join request
+  const handleDenyRequest = async (teamId: string, userId: string) => {
+    try {
+      // Update the team document to remove the user from the joinRequests array
+      const teamDocRef = doc(db, 'teams', teamId);
+      await updateDoc(teamDocRef, {
+        joinRequests: arrayRemove(userId),
+      });
+
+      // Remove the user from the requestingUsers array locally
+      setRequestingUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+    } catch (error) {
+      console.error("Error denying join request:", error);
+    }
+  };
+
   // Handle removing a player from the team
   const handleRemovePlayer = async (teamId: string, playerId: string) => {
     try {
+      if (!teamId || !playerId) {
+        return;
+      }
+
       const teamDocRef = doc(db, 'teams', teamId);
 
-      // Remove the player from the players array
+      // Remove the player from the players array in Firestore
       await updateDoc(teamDocRef, {
         players: arrayRemove(playerId),
       });
@@ -173,15 +213,16 @@ export default function TeamExample() {
                             {selectedTeamId === team.id ? 'Hide Join Requests' : 'View Join Requests'}
                           </Button>
 
-                          {/* Button to show the list of players */}
-                          <Button
-                            variant="outlined"
-                            size="sm"
-                            sx={{ mt: 1 }}
-                            onClick={() => handleShowPlayers(team.id)}
-                          >
-                            {showPlayers ? 'Hide Players' : 'Manage Players'}
-                          </Button>
+                          {/* Added spacing between buttons */}
+                          <Box sx={{ mt: 2 }}>
+                            <Button
+                              variant="outlined"
+                              size="sm"
+                              onClick={() => handleShowPlayers(team.id)}
+                            >
+                              {showPlayersTeamId === team.id ? 'Hide Players' : 'Manage Players'}
+                            </Button>
+                          </Box>
                         </Box>
                       ))
                     ) : (
@@ -205,14 +246,14 @@ export default function TeamExample() {
                               <Typography level="body-md" component="p">
                                 Request from: {user.name}
                               </Typography>
-                              <Button variant="solid" size="sm" sx={{ mt: 1, mr: 1 }} onClick={() => handleAcceptRequest(selectedTeamId, user.id)}>
+                              <Button variant="solid" size="sm" sx={{ mt: 1, mr: 1 }} onClick={() => handleAcceptRequest(selectedTeamId!, user.id)}>
                                 Accept
                               </Button>
                               <Button
                                 variant="outlined"
                                 size="sm"
                                 sx={{ mb: 2 }}
-                                onClick={() => handleDenyRequest(selectedTeamId, user.id)}
+                                onClick={() => handleDenyRequest(selectedTeamId!, user.id)}
                               >
                                 Deny
                               </Button>
@@ -227,7 +268,7 @@ export default function TeamExample() {
                     )}
 
                     {/* Show players in the selected team */}
-                    {showPlayers && teamPlayers.length > 0 && (
+                    {showPlayersTeamId && teamPlayers.length > 0 && (
                       <Box sx={{ textAlign: 'left', mt: 4 }}>
                         <Typography level="title-md" textColor="text.secondary" component="p" fontWeight={700}>
                           Team Players:
@@ -242,7 +283,7 @@ export default function TeamExample() {
                               variant="outlined"
                               size="sm"
                               sx={{ mt: 1 }}
-                              onClick={() => handleRemovePlayer(selectedTeamId!, player.id)}
+                              onClick={() => handleRemovePlayer(showPlayersTeamId!, player.id)}  // Passed the correct team ID
                             >
                               Remove Player
                             </Button>
