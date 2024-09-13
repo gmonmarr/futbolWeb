@@ -1,3 +1,5 @@
+// src/pages/team.tsx
+
 import * as React from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { CssVarsProvider } from '@mui/joy/styles';

@@ -1,15 +1,13 @@
-// src/pages/login.js
-
 import React, { useState, useEffect } from "react";
-import { auth, googleProvider, db, doc, setDoc, getDoc } from "../firebase";
+import { auth, db, doc, setDoc, getDoc } from "../firebase";
 import {
-  signInWithPopup,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
   onAuthStateChanged,
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import './login.css'; // Assuming you will have some CSS for styles
 
 function Login() {
   const [user, setUser] = useState(null);
@@ -19,7 +17,7 @@ function Login() {
   const [matriculaTEC, setMatriculaTEC] = useState(""); // Matricula TEC
   const [newUser, setNewUser] = useState(false); // Toggle between login and registration
   const [error, setError] = useState("");
-  const [isProfileComplete, setIsProfileComplete] = useState(false); // New state to track if profile is complete
+  const [isProfileComplete, setIsProfileComplete] = useState(false); // Track if profile is complete
   const navigate = useNavigate();
 
   // Function to validate Matricula TEC format
@@ -28,26 +26,23 @@ function Login() {
     return regex.test(matriculaTEC);
   };
 
-  // Handle user session state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
   
-        // Verifica si el usuario ha completado su perfil (matriculaTEC)
         const userDoc = await getDoc(doc(db, "users", currentUser.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
           if (userData.matriculaTEC) {
             setIsProfileComplete(true);
-            // Redirige según el rol del usuario
             if (userData.role === 'Admin') {
               navigate("/admin");
             } else {
               navigate("/team");
             }
           } else {
-            setIsProfileComplete(false); // Muestra el formulario para completar el perfil
+            setIsProfileComplete(false);
           }
         }
       }
@@ -55,11 +50,8 @@ function Login() {
     return () => unsubscribe();
   }, [navigate]);
 
-  // Register user
   const handleRegister = async (e) => {
     e.preventDefault();
-    
-    // Validate Matricula TEC
     if (!validateMatriculaTEC(matriculaTEC)) {
       setError("Matricula TEC must follow the format A######## (A followed by 8 digits).");
       return;
@@ -73,67 +65,38 @@ function Login() {
 
       const result = await createUserWithEmailAndPassword(auth, email, password);
 
-      // Update user profile with name
-      await updateProfile(result.user, {
-        displayName: name, // Use provided name
-      });
+      await updateProfile(result.user, { displayName: name });
 
-      // Store user info in Firestore
       await setDoc(doc(db, "users", result.user.uid), {
         name: name,
         matriculaTEC: matriculaTEC,
         email: email,
-        role: "Player", // Default role as Player
+        role: "Player",
       });
 
-      navigate("/create-team"); // Redirect to create team after registration
+      navigate("/create-team");
     } catch (error) {
       setError(error.message);
     }
   };
 
-  // Handle Google Sign-In
-  const handleGoogleLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const googleUser = result.user;
-
-      setEmail(googleUser.email);
-      setUser(googleUser);
-
-      // Check if profile is complete
-      const userDoc = await getDoc(doc(db, "users", googleUser.uid));
-      if (!userDoc.exists() || !userDoc.data().matriculaTEC) {
-        setIsProfileComplete(false); // Show form to complete profile
-      } else {
-        setIsProfileComplete(true);
-        navigate("/create-team"); // Redirect to create team after Google login
-      }
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-
-  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       setUser(result.user);
 
-      // Verifica si el usuario existe y si ha completado el perfil
       const userDoc = await getDoc(doc(db, "users", result.user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
         if (userData.matriculaTEC) {
-          // Redirige a la página de administración si el usuario es un admin
           if (userData.role === 'Admin') {
             navigate("/admin");
           } else {
-            navigate("/create-team"); // Redirige a la creación de equipo si no es admin
+            navigate("/create-team");
           }
         } else {
-          setIsProfileComplete(false); // Muestra el formulario para completar el perfil
+          setIsProfileComplete(false);
         }
       } else {
         setError("User data not found");
@@ -143,70 +106,61 @@ function Login() {
     }
   };
 
-
   return (
     <div className="login-container">
-      <div className="login-box">
-        {user && isProfileComplete ? (
-          <div>
-            <h2>Welcome, {user.displayName || user.email}</h2>
-          </div>
-        ) : (
-          <>
-            <h2>{newUser ? "Register" : "Login"}</h2>
-            <form onSubmit={newUser ? handleRegister : handleLogin}>
+      <div className="login-card">
+        <h2>{newUser ? "Crear Cuenta" : "Login"}</h2>
+        <form onSubmit={newUser ? handleRegister : handleLogin}>
+          <input
+            type="email"
+            placeholder="Ingresa tu mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="input-field"
+          />
+          <input
+            type="password"
+            placeholder="Ingresa tu password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="input-field"
+          />
+          {newUser && (
+            <>
               <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Ingresa tu nombre"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
+                className="input-field"
               />
               <input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                type="text"
+                placeholder="Ingresa tu Matrícula TEC"
+                value={matriculaTEC}
+                onChange={(e) => setMatriculaTEC(e.target.value)}
                 required
+                className="input-field"
               />
+            </>
+          )}
 
-              {/* Prompt for Name and Matricula TEC only if signing up */}
-              {newUser && (
-                <>
-                  <input
-                    type="text"
-                    placeholder="Enter your Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                  <input
-                    type="text"
-                    placeholder="Enter your Matricula TEC"
-                    value={matriculaTEC}
-                    onChange={(e) => setMatriculaTEC(e.target.value)}
-                    required
-                  />
-                </>
-              )}
+          <button type="submit" className="submit-button">
+            {newUser ? "Crear Cuenta" : "Login"}
+          </button>
+        </form>
+        
+        <p>
+          {newUser ? "Ya tienes una cuenta?" : "No tienes una cuenta?"}
+          <button type="button" onClick={() => setNewUser(!newUser)} className="toggle-button">
+            {newUser ? "Login" : "Crear Cuenta"}
+          </button>
+        </p>
 
-              <button type="submit">{newUser ? "Sign Up" : "Login"}</button>
-            </form>
-
-            <button onClick={handleGoogleLogin}>
-              Login with Google
-            </button>
-
-            <p>
-              {newUser ? "Already have an account?" : "Don’t have an account?"}
-              <button type="button" onClick={() => setNewUser(!newUser)}>
-                {newUser ? "Login" : "Register"}
-              </button>
-            </p>
-
-            {error && <p style={{ color: "red" }}>{error}</p>}
-          </>
-        )}
+        {error && <p className="error-message">{error}</p>}
       </div>
     </div>
   );

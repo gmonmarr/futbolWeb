@@ -1,143 +1,65 @@
-/* /src/pages/login.css */
-
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
+.login-container {
   display: flex;
-  justify-content: center; /* Horizontally centers the login box */
-  align-items: center; /* Vertically centers the login box */
-  background-image: url('https://media.gq.com.mx/photos/663be862381688dfd248f3ea/16:9/w_2992,h_1683,c_limit/Final_de_la_Champions_League_2024_2151065209.jpg'); /* Replace with your background image */
-  background-size: cover;
-  background-position: center;
-  font-family: Arial, sans-serif;
-}
-
-/* Apply a dark overlay */
-body::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Darken the background */
-  z-index: -1;
-}
-
-/* The login box */
-.login-box {
-  background-color: rgba(255, 255, 255, 0.1); /* Slight transparency */
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  text-align: center;
-  width: 350px;
-  backdrop-filter: blur(10px); /* Blurring effect */
-  color: #fff; /* White text */
-  /* Remove margin-left for proper centering */
-}
-
-/* Headline */
-.login-box h2 {
-  color: #fff;
-  margin-bottom: 20px;
-  text-align: center; /* Ensures Welcome is centered */
-}
-
-/* Form Inputs */
-.login-box input[type="email"], 
-.login-box input[type="password"] {
-  width: 100%;
-  padding: 5px;
-  margin: 10px 0;
-  border: none;
-  border-radius: 5px;
-  outline: none;
-  background-color: rgba(255, 255, 255, 0.2); /* Transparent background for inputs */
-  color: #fff;
-}
-
-.login-box input::placeholder {
-  color: #ccc; /* Light placeholder text */
-}
-
-/* Remember me and forgot password section */
-.remember-forgot {
-  display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  height: 100vh;
+  background-color: #dee0e0;
 }
 
-.remember-forgot a {
-  color: #fff;
-  text-decoration: underline;
-  font-size: 0.9em;
-}
-
-/* Login button */
-.login-box button {
-  width: 100%;
-  padding: 15px;
+.login-card {
   background-color: white;
-  border: none;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  color: black;
-  transition: background-color 0.3s ease;
 }
 
-.login-box button:hover {
-  background-color: #ddd;
-}
-
-/* Register link */
-.login-box p {
-  color: #fff;
-  margin-top: 20px;
-}
-
-.login-box p a {
-  color: #fff;
-  text-decoration: underline;
-}
-
-/* Input focus styles */
-.login-box input:focus {
-  background-color: rgba(255, 255, 255, 0.3); /* Slight change on focus */
-}
-
-.google-login-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px; /* Adjust the padding to fit the logo */
-  margin-top: 20px;
-  background-color: white;
+.submit-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 50px; /* Adjust button width for logo-only */
-  height: 50px; /* Make button square */
+  font-size: 16px;
+  margin-top: 10px;
 }
 
-.google-login-btn img.google-logo {
-  width: 30px; /* Size the logo */
-  height: 30px;
+.submit-button:hover {
+  background-color: #0056b3;
 }
 
-.google-login-btn:hover {
-  background-color: #ddd;
+.toggle-button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
 }
 
+.toggle-button:hover {
+  text-decoration: underline;
+}
 
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .login-box {
-    width: 90%;
-  }
+.error-message {
+  color: red;
+  margin-top: 10px;
 }
