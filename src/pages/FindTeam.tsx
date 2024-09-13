@@ -33,7 +33,7 @@ export default function FindTeam() {
   const [divisions, setDivisions] = React.useState<Division[]>([]);
   const [selectedLeague, setSelectedLeague] = React.useState<string>('');
   const [selectedDivision, setSelectedDivision] = React.useState<string>('');
-  const [requestedTeams, setRequestedTeams] = React.useState<string[]>([]);
+  const [requestedTeams, setRequestedTeams] = React.useState<string[]>([]); // Tracks teams the user has requested to join
   const [alreadyInTeam, setAlreadyInTeam] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string>('');
   const [searchTerm, setSearchTerm] = React.useState<string>(''); // Search term
@@ -43,9 +43,14 @@ export default function FindTeam() {
 
   // Get current user
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setRequestedTeams(userData.requestedTeams || []); // Set requested teams if they exist
+        }
       } else {
         setCurrentUser(null);
         navigate('/login');
@@ -170,8 +175,8 @@ export default function FindTeam() {
 
   // Handle join request
   const handleJoinRequest = async (teamId: string) => {
-    if (requestedTeams.includes(teamId)) {
-      setErrorMessage('You have already requested to join this team.');
+    if (requestedTeams.length > 0) {
+      setErrorMessage('You have already requested to join a team.');
       return;
     }
 
@@ -180,7 +185,14 @@ export default function FindTeam() {
       await updateDoc(teamDocRef, {
         joinRequests: arrayUnion(currentUser?.uid),
       });
-      setRequestedTeams([...requestedTeams, teamId]);
+
+      // Update the user's profile to track the requested team
+      const userDocRef = doc(db, 'users', currentUser?.uid as string);
+      await updateDoc(userDocRef, {
+        requestedTeams: arrayUnion(teamId),
+      });
+
+      setRequestedTeams([teamId]); // Track the team request
       setErrorMessage('');
     } catch (error) {
       setErrorMessage('Failed to send join request.');
@@ -197,17 +209,9 @@ export default function FindTeam() {
           <Navigation />
         </Layout.SideNav>
         <Layout.SidePane>
-          {/* Título arriba */}
-          <Box sx={{ backgroundColor: '#f0f4f8', padding: '16px', borderRadius: '8px', 
-              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',  marginBottom: '24px' }}>
-                <Typography component="h1" variant="h4" sx={{ color: 'text.primary', fontWeight: 'bold' }}>
-                  Find a Team in a League
-                </Typography>
-          </Box>
-
           <Box sx={{ mt: 3, ml: 2, width: '95%' }}>
-            {/* Dropdowns in one row with space between */}
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
+            {/* Dropdowns */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <select
                 value={selectedLeague}
                 onChange={(e) => {
@@ -243,7 +247,7 @@ export default function FindTeam() {
               )}
             </Box>
 
-            {/* Search row */}
+            {/* Search */}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TextField
                 label="Search by Team Name"
@@ -256,7 +260,6 @@ export default function FindTeam() {
               <Button variant="contained" color="primary" onClick={handleSearch} size="small">
                 Search
               </Button>
-
               {searchPerformed && (
                 <Button
                   variant="outlined"
@@ -270,6 +273,7 @@ export default function FindTeam() {
               )}
             </Box>
 
+            {/* Teams */}
             {teams.length > 0 ? (
               <Grid container spacing={2}>
                 {teams.map((team) => (
