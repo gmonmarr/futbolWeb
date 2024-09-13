@@ -48,17 +48,6 @@ export default function Navigation() {
               <ListItemContent>Capitanes</ListItemContent>
             </ListItemButton>
           </ListItem>
-          <ListItem>
-            <ListItemButton selected={location.pathname === '/policies'} onClick={() => navigate('/policies')}>
-              <ListItemDecorator sx={{ color: 'neutral.500' }}>
-                <ArticleRoundedIcon fontSize="small" />
-              </ListItemDecorator>
-              <ListItemContent>Policies</ListItemContent>
-              <Chip variant="soft" color="warning" size="sm">
-                2
-              </Chip>
-            </ListItemButton>
-          </ListItem>
         </List>
       </ListItem>
 

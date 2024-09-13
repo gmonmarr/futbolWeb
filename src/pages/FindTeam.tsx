@@ -199,11 +199,15 @@ export default function FindTeam() {
           <Navigation />
         </Layout.SideNav>
         <Layout.SidePane>
-          <Box sx={{ mt: 3, ml: 2, width: '95%'}}>
-            <Typography variant="h6" component="h1" sx={{ mb: 2 }}> {/* Cambié el tamaño a h6 */}
-              Find a Team in a League
-            </Typography>
+          {/* Título arriba */}
+          <Box sx={{ backgroundColor: '#f0f4f8', padding: '16px', borderRadius: '8px', 
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',  marginBottom: '24px' }}>
+                <Typography level="h2" textColor="text.primary" component="h1">
+                  Find a Team in a League
+                </Typography>
+          </Box>
 
+          <Box sx={{ mt: 3, ml: 2, width: '95%'}}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               {/* League Dropdown */}
               <FormControl sx={{ mr: 1, minWidth: 160 }}>

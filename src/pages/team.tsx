@@ -154,7 +154,7 @@ export default function TeamExample() {
 
             {/* Left side - Teams */}
             <Box sx={{ width: '30%', paddingLeft: '32px' }}>
-              <Typography level="title-md" textColor="text.secondary" component="p">
+              <Typography level="title-md" textColor="text.secondary" component="p" fontWeight={700}>
                 Teams You Lead:
               </Typography>
 
@@ -185,7 +185,7 @@ export default function TeamExample() {
           <Box sx={{ width: '50%', paddingLeft: '32px' }}>
             {selectedTeamId && joinRequests.length > 0 && (
               <Box sx={{ textAlign: 'left' }}>
-                <Typography level="title-md" textColor="text.secondary" component="p">
+                <Typography level="title-md" textColor="text.secondary" component="p" fontWeight={700}>
                   Join Requests:
                 </Typography>
 

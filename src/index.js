@@ -13,7 +13,6 @@ import ProtectedRoute from './ProtectedRoute'; // Import the ProtectedRoute comp
 import reportWebVitals from './reportWebVitals';
 import LigaDivision from './pages/LigaDivision.tsx';
 
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
@@ -27,8 +26,7 @@ root.render(
         <Route path="/find-team" element={<FindTeam />} />
         <Route path="/capitanes" element={<Capitanes />} />
         <Route path="/capitanes" element={<Capitanes />} />
-        <Route path="/liga-division" element={<LigaDivision />} />
-        
+        <Route path="/liga-division" element={<LigaDivision />} />        
         
         {/* Protected route for Admin */}
         <Route path="/admin" element={
