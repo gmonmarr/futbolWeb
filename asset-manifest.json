@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/futbolWeb/static/css/main.50488f0e.css",
-    "main.js": "/futbolWeb/static/js/main.f07b25da.js",
+    "main.js": "/futbolWeb/static/js/main.5fad2418.js",
     "static/js/453.d98cbe52.chunk.js": "/futbolWeb/static/js/453.d98cbe52.chunk.js",
     "static/media/teclogo1.png": "/futbolWeb/static/media/teclogo1.9823f3e426bd4ec09972.png",
     "index.html": "/futbolWeb/index.html",
     "main.50488f0e.css.map": "/futbolWeb/static/css/main.50488f0e.css.map",
-    "main.f07b25da.js.map": "/futbolWeb/static/js/main.f07b25da.js.map",
+    "main.5fad2418.js.map": "/futbolWeb/static/js/main.5fad2418.js.map",
     "453.d98cbe52.chunk.js.map": "/futbolWeb/static/js/453.d98cbe52.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.50488f0e.css",
-    "static/js/main.f07b25da.js"
+    "static/js/main.5fad2418.js"
   ]
 }
