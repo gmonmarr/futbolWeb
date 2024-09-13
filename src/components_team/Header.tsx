@@ -1,5 +1,3 @@
-// src/components_team/Header.tsx
-
 import * as React from 'react';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
@@ -26,17 +24,15 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
-// Define the shape of userData
 interface UserData {
   name: string;
   email: string;
 }
 
-
-
 export default function Header() {
   const [open, setOpen] = React.useState(false);
   const [userData, setUserData] = React.useState<UserData | null>(null);
+  const [userRole, setUserRole] = React.useState<string | null>(null); // Estado para el rol del usuario
   const navigate = useNavigate();
 
   // Fetch user data from Firestore
@@ -45,7 +41,9 @@ export default function Header() {
       if (user) {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
-          setUserData(userDoc.data() as UserData); // Cast to UserData type
+          const userData = userDoc.data() as UserData;
+          setUserData(userData);
+          setUserRole(userDoc.data().role); // Obtiene el rol del usuario
         }
       }
     });
@@ -84,6 +82,7 @@ export default function Header() {
         >
           Calendario
         </Button>
+        {userRole != 'Admin' && (
         <Button
           variant="plain"
           color="neutral"
@@ -92,9 +91,10 @@ export default function Header() {
           href="./team"
           size="sm"
           sx={{ alignSelf: 'center' }}
-        >
+        > 
           Equipos
         </Button>
+        )}
         <Button
           variant="plain"
           color="neutral"
@@ -103,8 +103,29 @@ export default function Header() {
           size="sm"
           sx={{ alignSelf: 'center' }}
         >
-          ???
+          Tabla de Posición
         </Button>
+        {/* Muestra los botones adicionales si el usuario es Admin */}
+        {userRole === 'Admin' && (
+          <>
+            <Button
+              variant="plain"
+              color="primary"
+              onClick={() => navigate('/admin')}
+              sx={{ alignSelf: 'center' }}
+            >
+              Add Match
+            </Button>
+            <Button
+              variant="plain"
+              color="primary"
+              onClick={() => navigate('/liga-division')}
+              sx={{ alignSelf: 'center' }}
+            >
+              Add League/Division
+            </Button>
+          </>
+        )}
       </Stack>
 
       <Box sx={{ display: { xs: 'inline-flex', sm: 'none' } }}>
@@ -132,7 +153,6 @@ export default function Header() {
           alignItems: 'center',
         }}
       >
-
         <IconButton
           size="sm"
           variant="outlined"
@@ -141,7 +161,7 @@ export default function Header() {
         >
           <SearchRoundedIcon />
         </IconButton>
-        
+
         <Dropdown>
           <MenuButton
             variant="plain"

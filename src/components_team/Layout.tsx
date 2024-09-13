@@ -10,12 +10,10 @@ function Root(props: BoxProps) {
       {...props}
       sx={[
         {
-          bgcolor: 'background.appBody',
           display: 'grid',
           gridTemplateColumns: {
-            xs: '1fr', // Para pantallas pequeñas, una columna que ocupe todo el espacio.
-            sm: 'minmax(64px, 200px) 1fr', // Para pantallas medianas, una columna fija a la izquierda y el contenido principal con 1fr.
-            md: 'minmax(160px, 300px) 1fr', // Para pantallas más grandes, una columna más ancha a la izquierda y el contenido principal ocupando el resto.
+            xs: '1fr', // En pantallas pequeñas, una columna que ocupe todo el espacio.
+            sm: 'minmax(64px, 200px) 1fr', // En pantallas medianas y más grandes, una columna fija a la izquierda y el contenido principal con 1fr.
           },
           gridTemplateRows: '64px 1fr',
           minHeight: '100vh',
@@ -105,7 +103,15 @@ function Main(props: BoxProps) {
       component="main"
       className="Main"
       {...props}
-      sx={[{ p: 2 }, ...(Array.isArray(props.sx) ? props.sx : [props.sx])]}
+      sx={[
+        {
+          p: 2,
+          flexGrow: 1, // Hace que ocupe todo el espacio restante.
+          width: '100%', // Asegúrate de que ocupe todo el ancho disponible.
+          overflow: 'auto', // Permite el scroll si es necesario.
+        },
+        ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
+      ]}
     />
   );
 }

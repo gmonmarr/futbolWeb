@@ -10,6 +10,9 @@ import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import Layout from '../components_team/Layout.tsx';
+import Header from '../components_team/Header.tsx';
+
 
 interface League {
   id: string;
@@ -162,6 +165,16 @@ const LigaDivision: React.FC = () => {
   }, [userRole, navigate]);
 
   return (
+    <Layout.Root>
+      <Layout.Header>
+        <Header />
+      </Layout.Header>
+
+      <Layout.SideNav>
+      </Layout.SideNav>
+
+      <Layout.Main>
+
     <Box sx={{ padding: 4 }}>
       {userRole === 'Admin' && (
         <>
@@ -246,7 +259,12 @@ const LigaDivision: React.FC = () => {
         </>
       )}
     </Box>
+    </Layout.Main>
+    </Layout.Root>
+
+    
   );
+  
 };
 
 export default LigaDivision;

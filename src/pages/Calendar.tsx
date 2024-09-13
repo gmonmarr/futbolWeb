@@ -1,5 +1,3 @@
-// src/pages/Calendar.tsx
-
 import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/joy/Box';
@@ -11,6 +9,8 @@ import { auth, db } from '../firebase';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { getDoc } from 'firebase/firestore';
 import Header from '../components_team/Header.tsx';  // Importa el Header
+import Layout from '../components_team/Layout.tsx';  // Importa el Layout
+import Navigation from '../components_team/Navigation.tsx';
 
 // Define un tipo para las filas
 interface Partido {
@@ -129,10 +129,10 @@ const FixedSizeGrid = () => {
                   <EditIcon
                     onClick={() => setEditingState({ id: params.row.id, estado: params.value })}
                     sx={{
-                      fontSize: '1rem', // Hacer el ícono más pequeño
+                      fontSize: '1rem',
                       color: 'gray',
                       cursor: 'pointer',
-                      marginLeft: '8px', // Moverlo hacia la derecha del texto
+                      marginLeft: '8px',
                     }}
                   />
                 )}
@@ -145,16 +145,34 @@ const FixedSizeGrid = () => {
   ];
 
   return (
-    <>
-      <Header /> {/* El header va fuera del Box para que no afecte el tamaño */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%' }}>
-        {/* Title */}
-        <Typography component="h1" variant="h5" sx={{ textAlign: 'center', margin: '16px 0' }}>
-          Rol de Juegos
-        </Typography>
-
+    <Layout.Root>
+    <Layout.Header>
+      <Header />
+    </Layout.Header>
+  
+    <Layout.SideNav>
+      Patrocinadores
+    </Layout.SideNav>
+  
+    <Layout.Main>
+      {/* Aquí dentro está el contenido principal, el calendario */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column', // Organiza el contenido en columnas
+          padding: '16px',
+          height: '100%',
+          width: '98%', // Ocupa todo el ancho restante
+        }}
+      >
         {/* Dropdowns for filtering */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', width: '100%' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            paddingBottom: '16px',
+          }}
+        >
           <Box sx={{ minWidth: '200px' }}>
             <Typography component="p">Selecciona la División:</Typography>
             <select
@@ -174,7 +192,7 @@ const FixedSizeGrid = () => {
             <select
               value={selectedSemana}
               onChange={(e) => setSelectedSemana(e.target.value)}
-              style={{ width: '85%', padding: '10px' }}
+              style={{ width: '100%', padding: '10px' }}
             >
               <option value="">Todas las Semanas</option>
               {Array.from({ length: 18 }, (_, i) => (
@@ -185,13 +203,14 @@ const FixedSizeGrid = () => {
         </Box>
   
         {/* Calendar DataGrid */}
-        <Box sx={{ flexGrow: 1, padding: '16px', width: '100%' }}>
-          <Box sx={{ height: 500, width: '97.5%' }}>
-            <DataGrid rows={filteredRows} columns={columns} sx={{ overflowY: 'auto' }} />
-          </Box>
+        <Box sx={{ height: 600, width: '100%' }}>
+          <DataGrid rows={filteredRows} columns={columns} sx={{ overflowY: 'auto', width: '100%' }} />
         </Box>
       </Box>
-    </>
+    </Layout.Main>
+  </Layout.Root>
+  
+
   );
 }
 

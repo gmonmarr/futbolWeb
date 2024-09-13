@@ -10,6 +10,9 @@ import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import Layout from '../components_team/Layout.tsx';
+import Header from '../components_team/Header.tsx';
+
 
 interface Team {
   id: string;
@@ -204,183 +207,194 @@ const Admin: React.FC = () => {
   };
 
   return (
-    <Box sx={{ padding: 4 }}>
-      {userRole === 'Admin' && (
-        <>
-          <Typography component="h1" level="h4" gutterBottom>
-            Admin - Add Match
-          </Typography>
-          
-          {renderUserDetails()}
+    <Layout.Root>
+      <Layout.Header>
+        <Header />
+      </Layout.Header>
 
-          <form onSubmit={handleSubmit}>
-            {/* Date */}
-            <Box sx={{ marginBottom: 2 }}>
-              <TextField
-                label="Date"
-                name="fecha"
-                value={formData.fecha}
-                onChange={handleChange}
-                fullWidth
-                required
-              />
-            </Box>
+      <Layout.SideNav>
+      </Layout.SideNav>
 
-            {/* Time */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Select Time:</Typography>
-              <select
-                value={selectedHora}
-                onChange={(e) => setSelectedHora(e.target.value)}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Select Time</option>
-                <option value="17:30">17:30</option>
-                <option value="18:30">18:30</option>
-                <option value="19:30">19:30</option>
-                <option value="20:30">20:30</option>
-              </select>
-            </Box>
+      <Layout.Main>
+        <Box sx={{ padding: 4 }}>
+          {userRole === 'Admin' && (
+            <>
+              <Typography component="h1" level="h4" gutterBottom>
+                Admin - Add Match
+              </Typography>
+              
+              {renderUserDetails()}
 
-            {/* League */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Select League:</Typography>
-              <select
-                value={selectedLeague}
-                onChange={(e) => {
-                  setSelectedLeague(e.target.value);
-                  setSelectedDivision(''); 
-                  setDivisions([]); 
-                  setTeams([]); 
-                }}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Select a League</option>
-                {leagues.map((league) => (
-                  <option key={league.id} value={league.id}>
-                    {league.leagueName}
-                  </option>
-                ))}
-              </select>
-            </Box>
+              <form onSubmit={handleSubmit}>
+                {/* Date */}
+                <Box sx={{ marginBottom: 2 }}>
+                  <TextField
+                    label="Date"
+                    name="fecha"
+                    value={formData.fecha}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                  />
+                </Box>
 
-            {/* Division */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Select Division:</Typography>
-              <select
-                value={selectedDivision}
-                onChange={(e) => setSelectedDivision(e.target.value)}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Select a Division</option>
-                {divisions.map((division) => (
-                  <option key={division.id} value={division.id}>
-                    {division.divisionName}
-                  </option>
-                ))}
-              </select>
-            </Box>
+                {/* Time */}
+                <Box sx={{ marginBottom: 2 }}>
+                  <Typography component="p">Select Time:</Typography>
+                  <select
+                    value={selectedHora}
+                    onChange={(e) => setSelectedHora(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+                  >
+                    <option value="">Select Time</option>
+                    <option value="17:30">17:30</option>
+                    <option value="18:30">18:30</option>
+                    <option value="19:30">19:30</option>
+                    <option value="20:30">20:30</option>
+                  </select>
+                </Box>
 
-            {/* Home Team */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Select Home Team:</Typography>
-              <select
-                value={selectedEquipo1}
-                onChange={(e) => setSelectedEquipo1(e.target.value)}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Select a team</option>
-                {teams
-                  .filter((team) => team.id !== selectedEquipo2) // Exclude the away team
-                  .map((team) => (
-                    <option key={team.id} value={team.id}>
-                      {team.name}
-                    </option>
-                  ))}
-              </select>
-            </Box>
+                {/* League */}
+                <Box sx={{ marginBottom: 2 }}>
+                  <Typography component="p">Select League:</Typography>
+                  <select
+                    value={selectedLeague}
+                    onChange={(e) => {
+                      setSelectedLeague(e.target.value);
+                      setSelectedDivision(''); 
+                      setDivisions([]); 
+                      setTeams([]); 
+                    }}
+                    required
+                    style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+                  >
+                    <option value="">Select a League</option>
+                    {leagues.map((league) => (
+                      <option key={league.id} value={league.id}>
+                        {league.leagueName}
+                      </option>
+                    ))}
+                  </select>
+                </Box>
 
-            {/* Away Team */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Select Away Team:</Typography>
-              <select
-                value={selectedEquipo2}
-                onChange={(e) => setSelectedEquipo2(e.target.value)}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Select a team</option>
-                {teams
-                  .filter((team) => team.id !== selectedEquipo1) // Exclude the home team
-                  .map((team) => (
-                    <option key={team.id} value={team.id}>
-                      {team.name}
-                    </option>
-                  ))}
-              </select>
-            </Box>
+                {/* Division */}
+                <Box sx={{ marginBottom: 2 }}>
+                  <Typography component="p">Select Division:</Typography>
+                  <select
+                    value={selectedDivision}
+                    onChange={(e) => setSelectedDivision(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+                  >
+                    <option value="">Select a Division</option>
+                    {divisions.map((division) => (
+                      <option key={division.id} value={division.id}>
+                        {division.divisionName}
+                      </option>
+                    ))}
+                  </select>
+                </Box>
 
-            {/* Field */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Select Field:</Typography>
-              <select
-                value={selectedCancha}
-                onChange={(e) => setSelectedCancha(e.target.value)}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Select Field</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="2">3</option>
-                <option value="2">4</option>
-              </select>
-            </Box>
+                {/* Home Team */}
+                <Box sx={{ marginBottom: 2 }}>
+                  <Typography component="p">Select Home Team:</Typography>
+                  <select
+                    value={selectedEquipo1}
+                    onChange={(e) => setSelectedEquipo1(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+                  >
+                    <option value="">Select a team</option>
+                    {teams
+                      .filter((team) => team.id !== selectedEquipo2) // Exclude the away team
+                      .map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.name}
+                        </option>
+                      ))}
+                  </select>
+                </Box>
 
-            {/* Week */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Select Week:</Typography>
-              <select
-                value={selectedSemana}
-                onChange={(e) => setSelectedSemana(e.target.value)}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Select Week</option>
-                {Array.from({ length: 18 }, (_, i) => (
-                  <option key={i + 1} value={`Week ${i + 1}`}>{`Week ${i + 1}`}</option>
-                ))}
-              </select>
-            </Box>
+                {/* Away Team */}
+                <Box sx={{ marginBottom: 2 }}>
+                  <Typography component="p">Select Away Team:</Typography>
+                  <select
+                    value={selectedEquipo2}
+                    onChange={(e) => setSelectedEquipo2(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+                  >
+                    <option value="">Select a team</option>
+                    {teams
+                      .filter((team) => team.id !== selectedEquipo1) // Exclude the home team
+                      .map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.name}
+                        </option>
+                      ))}
+                  </select>
+                </Box>
 
-            {/* Match Status */}
-            <Box sx={{ marginBottom: 2 }}>
-              <Typography component="p">Select Match Status:</Typography>
-              <select
-                value={selectedEstado}
-                onChange={(e) => setSelectedEstado(e.target.value)}
-                required
-                style={{ width: '100%', padding: '8px', marginTop: '10px' }}
-              >
-                <option value="">Select Status</option>
-                <option value="Played">Played</option>
-                <option value="Canceled">Canceled</option>
-                <option value="Rescheduled">Rescheduled</option>
-                <option value="To Be Played">To Be Played</option>
-              </select>
-            </Box>
+                {/* Field */}
+                <Box sx={{ marginBottom: 2 }}>
+                  <Typography component="p">Select Field:</Typography>
+                  <select
+                    value={selectedCancha}
+                    onChange={(e) => setSelectedCancha(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+                  >
+                    <option value="">Select Field</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="2">3</option>
+                    <option value="2">4</option>
+                  </select>
+                </Box>
 
-            <Button variant="contained" color="primary" type="submit">
-              Add Match
-            </Button>
-          </form>
-        </>
-      )}
-    </Box>
+                {/* Week */}
+                <Box sx={{ marginBottom: 2 }}>
+                  <Typography component="p">Select Week:</Typography>
+                  <select
+                    value={selectedSemana}
+                    onChange={(e) => setSelectedSemana(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+                  >
+                    <option value="">Select Week</option>
+                    {Array.from({ length: 18 }, (_, i) => (
+                      <option key={i + 1} value={`Week ${i + 1}`}>{`Week ${i + 1}`}</option>
+                    ))}
+                  </select>
+                </Box>
+
+                {/* Match Status */}
+                <Box sx={{ marginBottom: 2 }}>
+                  <Typography component="p">Select Match Status:</Typography>
+                  <select
+                    value={selectedEstado}
+                    onChange={(e) => setSelectedEstado(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '8px', marginTop: '10px' }}
+                  >
+                    <option value="">Select Status</option>
+                    <option value="Played">Played</option>
+                    <option value="Canceled">Canceled</option>
+                    <option value="Rescheduled">Rescheduled</option>
+                    <option value="To Be Played">To Be Played</option>
+                  </select>
+                </Box>
+
+                <Button variant="contained" color="primary" type="submit">
+                  Add Match
+                </Button>
+              </form>
+            </>
+          )}
+        </Box>
+        </Layout.Main>
+    </Layout.Root>
   );
 };
 
