@@ -22,6 +22,12 @@ function Login() {
   const [isProfileComplete, setIsProfileComplete] = useState(false); // New state to track if profile is complete
   const navigate = useNavigate();
 
+  // Function to validate Matricula TEC format
+  const validateMatriculaTEC = (matriculaTEC) => {
+    const regex = /^A\d{8}$/; // Regex pattern for A followed by 8 digits
+    return regex.test(matriculaTEC);
+  };
+
   // Handle user session state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -52,6 +58,13 @@ function Login() {
   // Register user
   const handleRegister = async (e) => {
     e.preventDefault();
+    
+    // Validate Matricula TEC
+    if (!validateMatriculaTEC(matriculaTEC)) {
+      setError("Matricula TEC must follow the format A######## (A followed by 8 digits).");
+      return;
+    }
+
     try {
       if (!name) {
         setError("Name is required for registration.");
