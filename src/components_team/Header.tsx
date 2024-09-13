@@ -103,16 +103,6 @@ export default function Header() {
             Equipos
           </Button>
         )}
-        <Button
-          variant="plain"
-          color="neutral"
-          component="a"
-          href="/joy-ui/getting-started/templates/files/"
-          size="sm"
-          sx={{ alignSelf: 'center' }}
-        >
-          Tabla de Posición
-        </Button>
         {userRole === 'Admin' && (
           <>
             <Button

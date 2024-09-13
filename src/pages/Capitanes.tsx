@@ -1,16 +1,18 @@
+// src/pages/Capitanes.tsx
+
 import * as React from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
-import Typography from '@mui/joy/Typography';
 import Card from '@mui/joy/Card';
 import Divider from '@mui/joy/Divider';
-import Grid from '@mui/joy/Grid';
+import Grid from '@mui/material/Grid'; // Asegúrate de que Grid viene de Material UI
 import Input from '@mui/joy/Input';
 import Layout from '../components_team/Layout.tsx';
 import Header from '../components_team/Header.tsx';
 import Navigation from '../components_team/Navigation.tsx';
+import Typography from '@mui/material/Typography'; // Usa Typography de Material UI
 import './team.css';
 import { auth, db } from '../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -61,8 +63,8 @@ export default function Capitanes() {
         </Layout.SideNav>
         <Layout.SidePane>
           <Box sx={{ backgroundColor: '#f0f4f8', padding: '16px', borderRadius: '8px', 
-            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',  marginBottom: '24px' }}>
-            <Typography level="h1" textColor="text.primary" component="h1">
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',  marginBottom: '24px' }}>
+            <Typography variant="h1" color="textPrimary" component="h4">
               Capitanes
             </Typography>
           </Box>
@@ -82,7 +84,7 @@ export default function Capitanes() {
                 <Grid container spacing={2} justifyContent="flex-start">
                   {filteredCaptains.length > 0 ? (
                     filteredCaptains.map((captain) => (
-                      <Grid item paddingRight={40} xs={12} sm={6} md={4} lg={3} key={captain.id}>
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={captain.id}>
                         <Card
                           variant="outlined"
                           sx={{
@@ -94,18 +96,16 @@ export default function Capitanes() {
                             maxWidth: '300px',
                             minWidth: '300px',
                             margin: '0 auto'
-                            
                           }}
                         >
-                        
-                          <Box >
-                            <Typography level="h6" component="p" sx={{ mb: 1 }}>
+                          <Box>
+                            <Typography variant="h6" component="p" sx={{ mb: 1 }}>
                               Nombre: <strong>{captain.name}</strong>
                             </Typography>
-                            <Typography level="body2" component="p" sx={{ mb: 1 }}>
+                            <Typography variant="body2" component="p" sx={{ mb: 1 }}>
                               Equipo: <strong>{captain.teamName || 'No team'}</strong>
                             </Typography>
-                            <Typography level="body2" component="p">
+                            <Typography variant="body2" component="p">
                               Correo: <strong>{captain.email}</strong>
                             </Typography>
                           </Box>
@@ -114,14 +114,14 @@ export default function Capitanes() {
                       </Grid>
                     ))
                   ) : (
-                    <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
+                    <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
                       No se encontraron capitanes.
                     </Typography>
                   )}
                 </Grid>
               </>
             ) : (
-              <Typography level="h4" textColor="text.secondary" component="h1">
+              <Typography variant="h6" color="textSecondary" component="h1">
                 No has iniciado sesión. Por favor, inicia sesión para ver la lista de capitanes.
               </Typography>
             )}

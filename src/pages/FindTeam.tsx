@@ -202,7 +202,7 @@ export default function FindTeam() {
           {/* Título arriba */}
           <Box sx={{ backgroundColor: '#f0f4f8', padding: '16px', borderRadius: '8px', 
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',  marginBottom: '24px' }}>
-                <Typography level="h2" textColor="text.primary" component="h1">
+                <Typography component="h1" variant="h4" sx={{ color: 'text.primary', fontWeight: 'bold' }}>
                   Find a Team in a League
                 </Typography>
           </Box>
