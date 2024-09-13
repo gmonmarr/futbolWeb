@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/static/css/main.50488f0e.css",
-    "main.js": "/static/js/main.7c604410.js",
-    "static/js/453.d98cbe52.chunk.js": "/static/js/453.d98cbe52.chunk.js",
-    "static/media/teclogo1.png": "/static/media/teclogo1.9823f3e426bd4ec09972.png",
-    "index.html": "/index.html",
-    "main.50488f0e.css.map": "/static/css/main.50488f0e.css.map",
-    "main.7c604410.js.map": "/static/js/main.7c604410.js.map",
-    "453.d98cbe52.chunk.js.map": "/static/js/453.d98cbe52.chunk.js.map"
+    "main.css": "/futbolWeb/static/css/main.50488f0e.css",
+    "main.js": "/futbolWeb/static/js/main.f07b25da.js",
+    "static/js/453.d98cbe52.chunk.js": "/futbolWeb/static/js/453.d98cbe52.chunk.js",
+    "static/media/teclogo1.png": "/futbolWeb/static/media/teclogo1.9823f3e426bd4ec09972.png",
+    "index.html": "/futbolWeb/index.html",
+    "main.50488f0e.css.map": "/futbolWeb/static/css/main.50488f0e.css.map",
+    "main.f07b25da.js.map": "/futbolWeb/static/js/main.f07b25da.js.map",
+    "453.d98cbe52.chunk.js.map": "/futbolWeb/static/js/453.d98cbe52.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.50488f0e.css",
-    "static/js/main.7c604410.js"
+    "static/js/main.f07b25da.js"
   ]
 }
