@@ -34,9 +34,7 @@ root.render(
             <Admin />
           </ProtectedRoute>
         } />
-        
-        {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/login" />} />
+
       </Routes>
     </Router>
   </React.StrictMode>
