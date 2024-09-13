@@ -203,20 +203,6 @@ export default function Header() {
                 </Box>
               </MenuItem>
 
-              <ListDivider />
-
-              <MenuItem>
-                <HelpRoundedIcon />
-                Help
-              </MenuItem>
-
-              <MenuItem onClick={() => navigate('/settings')}>
-                <SettingsRoundedIcon />
-                Settings
-              </MenuItem>
-
-              <ListDivider />
-
               <MenuItem onClick={handleLogout}>
                 <LogoutRoundedIcon />
                 Log out
