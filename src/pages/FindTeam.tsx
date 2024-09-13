@@ -33,7 +33,7 @@ export default function FindTeam() {
   const [divisions, setDivisions] = React.useState<Division[]>([]);
   const [selectedLeague, setSelectedLeague] = React.useState<string>('');
   const [selectedDivision, setSelectedDivision] = React.useState<string>('');
-  const [requestedTeams, setRequestedTeams] = React.useState<string[]>([]); // Tracks teams the user has requested to join
+  const [alreadyRequestedTeam, setAlreadyRequestedTeam] = React.useState<boolean>(false); // To check if user has already requested
   const [alreadyInTeam, setAlreadyInTeam] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string>('');
   const [searchTerm, setSearchTerm] = React.useState<string>(''); // Search term
@@ -46,11 +46,7 @@ export default function FindTeam() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setRequestedTeams(userData.requestedTeams || []); // Set requested teams if they exist
-        }
+        checkIfAlreadyRequested(user.uid); // Check if user has already requested to join a team
       } else {
         setCurrentUser(null);
         navigate('/login');
@@ -59,6 +55,21 @@ export default function FindTeam() {
 
     return () => unsubscribe();
   }, [navigate]);
+
+  // Check if the user has already requested to join any team
+  const checkIfAlreadyRequested = async (uid: string) => {
+    try {
+      const teamsSnapshot = await getDocs(collection(db, 'teams'));
+      teamsSnapshot.forEach((teamDoc) => {
+        const teamData = teamDoc.data();
+        if (teamData.joinRequests && teamData.joinRequests.includes(uid)) {
+          setAlreadyRequestedTeam(true);
+        }
+      });
+    } catch (error) {
+      setErrorMessage('Failed to check existing join requests.');
+    }
+  };
 
   // Fetch leagues
   React.useEffect(() => {
@@ -175,7 +186,7 @@ export default function FindTeam() {
 
   // Handle join request
   const handleJoinRequest = async (teamId: string) => {
-    if (requestedTeams.length > 0) {
+    if (alreadyRequestedTeam) {
       setErrorMessage('You have already requested to join a team.');
       return;
     }
@@ -186,13 +197,7 @@ export default function FindTeam() {
         joinRequests: arrayUnion(currentUser?.uid),
       });
 
-      // Update the user's profile to track the requested team
-      const userDocRef = doc(db, 'users', currentUser?.uid as string);
-      await updateDoc(userDocRef, {
-        requestedTeams: arrayUnion(teamId),
-      });
-
-      setRequestedTeams([teamId]); // Track the team request
+      setAlreadyRequestedTeam(true); // Mark that the user has requested to join a team
       setErrorMessage('');
     } catch (error) {
       setErrorMessage('Failed to send join request.');
@@ -287,10 +292,10 @@ export default function FindTeam() {
                           color="primary"
                           sx={{ mt: 1 }}
                           onClick={() => handleJoinRequest(team.id)}
-                          disabled={requestedTeams.includes(team.id) || alreadyInTeam}
+                          disabled={team.joinRequests.includes(currentUser?.uid) || alreadyRequestedTeam || alreadyInTeam}
                           size="small"
                         >
-                          {requestedTeams.includes(team.id) ? 'Request Sent' : 'Request to Join'}
+                          {team.joinRequests.includes(currentUser?.uid) ? 'Request Sent' : 'Request to Join'}
                         </Button>
                       </CardContent>
                     </Card>
