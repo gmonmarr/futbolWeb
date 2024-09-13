@@ -12,8 +12,8 @@ function Root(props: BoxProps) {
         {
           display: 'grid',
           gridTemplateColumns: {
-            xs: '1fr', // En pantallas pequeñas, una columna que ocupe todo el espacio.
-            sm: 'minmax(64px, 200px) 1fr', // En pantallas medianas y más grandes, una columna fija a la izquierda y el contenido principal con 1fr.
+            xs: '1fr',
+            sm: 'minmax(64px, 200px) 1fr',
           },
           gridTemplateRows: '64px 1fr',
           minHeight: '100vh',
@@ -23,7 +23,6 @@ function Root(props: BoxProps) {
     />
   );
 }
-
 
 function Header(props: BoxProps) {
   return (
@@ -106,9 +105,9 @@ function Main(props: BoxProps) {
       sx={[
         {
           p: 2,
-          flexGrow: 1, // Hace que ocupe todo el espacio restante.
-          width: '100%', // Asegúrate de que ocupe todo el ancho disponible.
-          overflow: 'auto', // Permite el scroll si es necesario.
+          flexGrow: 1,
+          width: '100%',
+          overflow: 'auto',
         },
         ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
       ]}
@@ -154,7 +153,7 @@ function SideDrawer(
   );
 }
 
-export default {
+const Layout = {
   Root,
   Header,
   SideNav,
@@ -162,3 +161,5 @@ export default {
   SideDrawer,
   Main,
 };
+
+export default Layout;

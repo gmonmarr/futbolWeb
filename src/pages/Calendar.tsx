@@ -1,16 +1,16 @@
+// src/pages/Calendar.tsx
+
 import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/material/Typography';
 import EditIcon from '@mui/icons-material/Edit';
-import { useNavigate } from 'react-router-dom';
-import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { getDoc } from 'firebase/firestore';
-import Header from '../components_team/Header.tsx';  // Importa el Header
-import Layout from '../components_team/Layout.tsx';  // Importa el Layout
-import Navigation from '../components_team/Navigation.tsx';
+import Header from '../components_team/Header.tsx';
+import Layout from '../components_team/Layout.tsx';
 
 // Define un tipo para las filas
 interface Partido {
@@ -22,16 +22,15 @@ interface Partido {
   cancha: string;
   division: string;
   semana: string;
-  estado: string; // Nuevo campo "Estado"
+  estado: string;
 }
 
 const FixedSizeGrid = () => {
   const [userData, setUserData] = React.useState<{ name: string; email: string; role: string } | null>(null);
-  const [rows, setRows] = React.useState<Partido[]>([]); // Estado con el tipo Partido
-  const [selectedDivision, setSelectedDivision] = React.useState(''); // División seleccionada
-  const [selectedSemana, setSelectedSemana] = React.useState(''); // Semana seleccionada
-  const [editingState, setEditingState] = React.useState<{ id: string; estado: string } | null>(null); // Estado de edición
-  const navigate = useNavigate();
+  const [rows, setRows] = React.useState<Partido[]>([]);
+  const [selectedDivision, setSelectedDivision] = React.useState('');
+  const [selectedSemana, setSelectedSemana] = React.useState('');
+  const [editingState, setEditingState] = React.useState<{ id: string; estado: string } | null>(null);
 
   // Fetch user data from Firestore
   React.useEffect(() => {
@@ -55,22 +54,11 @@ const FixedSizeGrid = () => {
         id: doc.id,
         ...doc.data(),
       }));
-      setRows(partidosData as Partido[]); // Asegurarse de que los datos sean del tipo Partido
+      setRows(partidosData as Partido[]);
     };
 
     fetchData();
   }, []);
-
-  // Handle logout
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        navigate('/login');
-      })
-      .catch((error) => {
-        console.error('Logout error:', error);
-      });
-  };
 
   // Filtrar filas según la división y la semana seleccionadas
   const filteredRows = rows.filter((row) => {
@@ -85,7 +73,9 @@ const FixedSizeGrid = () => {
     try {
       const partidoRef = doc(db, 'partidos', id);
       await updateDoc(partidoRef, { estado: newEstado });
-      setRows((prevRows) => prevRows.map((row) => (row.id === id ? { ...row, estado: newEstado } : row)));
+      setRows((prevRows) =>
+        prevRows.map((row) => (row.id === id ? { ...row, estado: newEstado } : row))
+      );
       setEditingState(null); // Salir del modo de edición
     } catch (error) {
       console.error('Error updating estado:', error);
@@ -146,72 +136,67 @@ const FixedSizeGrid = () => {
 
   return (
     <Layout.Root>
-    <Layout.Header>
-      <Header />
-    </Layout.Header>
+      <Layout.Header>
+        <Header />
+      </Layout.Header>
   
-    <Layout.SideNav>
-      Patrocinadores
-    </Layout.SideNav>
+      <Layout.SideNav>
+        Patrocinadores
+      </Layout.SideNav>
   
-    <Layout.Main>
-      {/* Aquí dentro está el contenido principal, el calendario */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column', // Organiza el contenido en columnas
-          padding: '16px',
-          height: '100%',
-          width: '98%', // Ocupa todo el ancho restante
-        }}
-      >
-        {/* Dropdowns for filtering */}
+      <Layout.Main>
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'space-between',
-            paddingBottom: '16px',
+            flexDirection: 'column',
+            padding: '16px',
+            height: '100%',
+            width: '98%',
           }}
         >
-          <Box sx={{ minWidth: '200px' }}>
-            <Typography component="p">Selecciona la División:</Typography>
-            <select
-              value={selectedDivision}
-              onChange={(e) => setSelectedDivision(e.target.value)}
-              style={{ width: '100%', padding: '10px' }}
-            >
-              <option value="">Todas las Divisiones</option>
-              <option value="Varonil 1 Fuerza">Varonil 1 Fuerza</option>
-              <option value="Varonil 2 Fuerza">Varonil 2 Fuerza</option>
-              <option value="Feminil Unica">Feminil Unica</option>
-            </select>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              paddingBottom: '16px',
+            }}
+          >
+            <Box sx={{ minWidth: '200px' }}>
+              <Typography component="p">Selecciona la División:</Typography>
+              <select
+                value={selectedDivision}
+                onChange={(e) => setSelectedDivision(e.target.value)}
+                style={{ width: '100%', padding: '10px' }}
+              >
+                <option value="">Todas las Divisiones</option>
+                <option value="Varonil 1 Fuerza">Varonil 1 Fuerza</option>
+                <option value="Varonil 2 Fuerza">Varonil 2 Fuerza</option>
+                <option value="Feminil Unica">Feminil Unica</option>
+              </select>
+            </Box>
+  
+            <Box sx={{ minWidth: '200px', marginRight: '30px' }}> 
+              <Typography component="p">Selecciona la Semana:</Typography>
+              <select
+                value={selectedSemana}
+                onChange={(e) => setSelectedSemana(e.target.value)}
+                style={{ width: '100%', padding: '10px' }}
+              >
+                <option value="">Todas las Semanas</option>
+                {Array.from({ length: 18 }, (_, i) => (
+                  <option key={i + 1} value={`Semana ${i + 1}`}>{`Semana ${i + 1}`}</option>
+                ))}
+              </select>
+            </Box>
           </Box>
   
-          <Box sx={{ minWidth: '200px' }}>
-            <Typography component="p">Selecciona la Semana:</Typography>
-            <select
-              value={selectedSemana}
-              onChange={(e) => setSelectedSemana(e.target.value)}
-              style={{ width: '100%', padding: '10px' }}
-            >
-              <option value="">Todas las Semanas</option>
-              {Array.from({ length: 18 }, (_, i) => (
-                <option key={i + 1} value={`Semana ${i + 1}`}>{`Semana ${i + 1}`}</option>
-              ))}
-            </select>
+          <Box sx={{ height: 600, width: '98%' }}>
+            <DataGrid rows={filteredRows} columns={columns} sx={{ overflowY: 'auto', width: '100%' }} />
           </Box>
         </Box>
-  
-        {/* Calendar DataGrid */}
-        <Box sx={{ height: 600, width: '100%' }}>
-          <DataGrid rows={filteredRows} columns={columns} sx={{ overflowY: 'auto', width: '100%' }} />
-        </Box>
-      </Box>
-    </Layout.Main>
-  </Layout.Root>
-  
-
+      </Layout.Main>
+    </Layout.Root>
   );
-}
+};
 
 export default FixedSizeGrid;

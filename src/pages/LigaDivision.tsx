@@ -201,7 +201,7 @@ const LigaDivision: React.FC = () => {
 
           {/* Select a league and create a new division */}
           <Box sx={{ marginTop: 4 }}>
-            <Typography component="h2" level="h5" gutterBottom>
+            <Typography component="h2" level="h4" gutterBottom>
               Add Division to a League
             </Typography>
             <form onSubmit={handleCreateDivision}>
@@ -241,7 +241,7 @@ const LigaDivision: React.FC = () => {
             {/* Display divisions under the selected league */}
             {selectedLeague && (
               <Box sx={{ marginTop: 4 }}>
-                <Typography component="h2" level="h5" gutterBottom>
+                <Typography component="h2" level="h4" gutterBottom>
                   Divisions in {leagues.find((league) => league.id === selectedLeague)?.leagueName}
                 </Typography>
                 {divisions.length > 0 ? (
