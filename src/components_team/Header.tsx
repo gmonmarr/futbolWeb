@@ -81,7 +81,7 @@ export default function Header() {
           variant="plain"
           color="neutral"
           component="a"
-          href="./calendar"
+          onClick={() => navigate('/calendar')}
           size="sm"
           sx={{ alignSelf: 'center' }}
         >
@@ -93,7 +93,7 @@ export default function Header() {
             color="neutral"
             aria-pressed={location.pathname === '/team'} // Verifica si la ruta actual es /team
             component="a"
-            href="./team"
+            onClick={() => navigate('/team')}
             size="sm"
             sx={{ alignSelf: 'center' }}
           >
