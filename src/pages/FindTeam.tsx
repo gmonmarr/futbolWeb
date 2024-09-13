@@ -33,7 +33,7 @@ export default function FindTeam() {
   const [divisions, setDivisions] = React.useState<Division[]>([]);
   const [selectedLeague, setSelectedLeague] = React.useState<string>('');
   const [selectedDivision, setSelectedDivision] = React.useState<string>('');
-  const [alreadyRequestedTeam, setAlreadyRequestedTeam] = React.useState<boolean>(false); // To check if user has already requested
+  const [requestedTeams, setRequestedTeams] = React.useState<string[]>([]);
   const [alreadyInTeam, setAlreadyInTeam] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string>('');
   const [searchTerm, setSearchTerm] = React.useState<string>(''); // Search term
@@ -43,10 +43,9 @@ export default function FindTeam() {
 
   // Get current user
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
-        checkIfAlreadyRequested(user.uid); // Check if user has already requested to join a team
       } else {
         setCurrentUser(null);
         navigate('/login');
@@ -55,21 +54,6 @@ export default function FindTeam() {
 
     return () => unsubscribe();
   }, [navigate]);
-
-  // Check if the user has already requested to join any team
-  const checkIfAlreadyRequested = async (uid: string) => {
-    try {
-      const teamsSnapshot = await getDocs(collection(db, 'teams'));
-      teamsSnapshot.forEach((teamDoc) => {
-        const teamData = teamDoc.data();
-        if (teamData.joinRequests && teamData.joinRequests.includes(uid)) {
-          setAlreadyRequestedTeam(true);
-        }
-      });
-    } catch (error) {
-      setErrorMessage('Failed to check existing join requests.');
-    }
-  };
 
   // Fetch leagues
   React.useEffect(() => {
@@ -186,8 +170,8 @@ export default function FindTeam() {
 
   // Handle join request
   const handleJoinRequest = async (teamId: string) => {
-    if (alreadyRequestedTeam) {
-      setErrorMessage('You have already requested to join a team.');
+    if (requestedTeams.includes(teamId)) {
+      setErrorMessage('You have already requested to join this team.');
       return;
     }
 
@@ -196,8 +180,7 @@ export default function FindTeam() {
       await updateDoc(teamDocRef, {
         joinRequests: arrayUnion(currentUser?.uid),
       });
-
-      setAlreadyRequestedTeam(true); // Mark that the user has requested to join a team
+      setRequestedTeams([...requestedTeams, teamId]);
       setErrorMessage('');
     } catch (error) {
       setErrorMessage('Failed to send join request.');
@@ -214,9 +197,17 @@ export default function FindTeam() {
           <Navigation />
         </Layout.SideNav>
         <Layout.SidePane>
+          {/* Título arriba */}
+          <Box sx={{ backgroundColor: '#f0f4f8', padding: '16px', borderRadius: '8px', 
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',  marginBottom: '24px' }}>
+                <Typography component="h1" variant="h4" sx={{ color: 'text.primary', fontWeight: 'bold' }}>
+                  Find a Team in a League
+                </Typography>
+          </Box>
+
           <Box sx={{ mt: 3, ml: 2, width: '95%' }}>
-            {/* Dropdowns */}
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            {/* Dropdowns in one row with space between */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
               <select
                 value={selectedLeague}
                 onChange={(e) => {
@@ -252,7 +243,7 @@ export default function FindTeam() {
               )}
             </Box>
 
-            {/* Search */}
+            {/* Search row */}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TextField
                 label="Search by Team Name"
@@ -265,6 +256,7 @@ export default function FindTeam() {
               <Button variant="contained" color="primary" onClick={handleSearch} size="small">
                 Search
               </Button>
+
               {searchPerformed && (
                 <Button
                   variant="outlined"
@@ -278,7 +270,6 @@ export default function FindTeam() {
               )}
             </Box>
 
-            {/* Teams */}
             {teams.length > 0 ? (
               <Grid container spacing={2}>
                 {teams.map((team) => (
@@ -292,10 +283,10 @@ export default function FindTeam() {
                           color="primary"
                           sx={{ mt: 1 }}
                           onClick={() => handleJoinRequest(team.id)}
-                          disabled={team.joinRequests.includes(currentUser?.uid) || alreadyRequestedTeam || alreadyInTeam}
+                          disabled={requestedTeams.includes(team.id) || alreadyInTeam}
                           size="small"
                         >
-                          {team.joinRequests.includes(currentUser?.uid) ? 'Request Sent' : 'Request to Join'}
+                          {requestedTeams.includes(team.id) ? 'Request Sent' : 'Request to Join'}
                         </Button>
                       </CardContent>
                     </Card>

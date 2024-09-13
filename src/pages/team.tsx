@@ -1,5 +1,3 @@
-// src/pages/team.tsx
-
 import * as React from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { CssVarsProvider } from '@mui/joy/styles';
@@ -14,17 +12,18 @@ import './team.css';
 
 // Import Firebase services
 import { auth, db } from '../firebase';
-import { collection, query, where, getDocs, doc, getDoc, updateDoc, arrayRemove, arrayUnion } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, updateDoc, arrayRemove } from 'firebase/firestore';
 
 export default function TeamExample() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  // const navigate = useNavigate();
   const [currentUser, setCurrentUser] = React.useState<User | null>(null);
   const [userData, setUserData] = React.useState<any>(null); // User-specific data
   const [teams, setTeams] = React.useState<any[]>([]); // Teams where the user is the leader
   const [joinRequests, setJoinRequests] = React.useState<any[]>([]); // Join requests for the selected team
   const [requestingUsers, setRequestingUsers] = React.useState<any[]>([]); // Requesting user details
   const [selectedTeamId, setSelectedTeamId] = React.useState<string | null>(null); // Stores selected team ID for toggling
+  const [teamPlayers, setTeamPlayers] = React.useState<any[]>([]); // Players in the selected team
+  const [showPlayers, setShowPlayers] = React.useState<boolean>(false); // Controls showing players
 
   // Get the current user and load their data and team data
   React.useEffect(() => {
@@ -85,40 +84,43 @@ export default function TeamExample() {
     }
   };
 
-  // Handle accepting a join request
-  const handleAcceptRequest = async (teamId: string, requestId: string) => {
+  // Handle fetching and showing team players
+  const handleShowPlayers = async (teamId: string) => {
     try {
       const teamDocRef = doc(db, 'teams', teamId);
-
-      // Remove the user from joinRequests and add them to the players array
-      await updateDoc(teamDocRef, {
-        joinRequests: arrayRemove(requestId),
-        players: arrayUnion(requestId),
-      });
-
-      // Update local state to reflect changes
-      setJoinRequests((prevRequests) => prevRequests.filter((id) => id !== requestId));
-      setRequestingUsers((prevUsers) => prevUsers.filter((user) => user.id !== requestId)); // Remove the user from display
+      const teamDoc = await getDoc(teamDocRef);
+      if (teamDoc.exists()) {
+        const teamData = teamDoc.data();
+        const playerPromises = teamData.players.map(async (playerId: string) => {
+          const playerDocRef = doc(db, 'users', playerId);
+          const playerDoc = await getDoc(playerDocRef);
+          return playerDoc.exists() ? { id: playerId, ...playerDoc.data() } : null;
+        });
+        let players = await Promise.all(playerPromises);
+        players = players.filter((player) => player !== null); // Filter out null values
+        players = players.filter((player) => player.id !== currentUser?.uid); // Filter out current user
+        setTeamPlayers(players);
+        setShowPlayers(!showPlayers); // Toggle the display of players
+      }
     } catch (error) {
-      console.error('Error accepting request:', error);
+      console.error('Error fetching players:', error);
     }
   };
 
-  // Handle denying a join request
-  const handleDenyRequest = async (teamId: string, requestId: string) => {
+  // Handle removing a player from the team
+  const handleRemovePlayer = async (teamId: string, playerId: string) => {
     try {
       const teamDocRef = doc(db, 'teams', teamId);
 
-      // Remove the user from joinRequests array
+      // Remove the player from the players array
       await updateDoc(teamDocRef, {
-        joinRequests: arrayRemove(requestId),
+        players: arrayRemove(playerId),
       });
 
       // Update local state to reflect changes
-      setJoinRequests((prevRequests) => prevRequests.filter((id) => id !== requestId));
-      setRequestingUsers((prevUsers) => prevUsers.filter((user) => user.id !== requestId)); // Remove the user from display
+      setTeamPlayers((prevPlayers) => prevPlayers.filter((player) => player.id !== playerId));
     } catch (error) {
-      console.error('Error denying request:', error);
+      console.error('Error removing player:', error);
     }
   };
 
@@ -146,80 +148,111 @@ export default function TeamExample() {
               </Typography>
           </Box>
 
-                
           <Box className="team-header-box">
             {currentUser ? (
               <>
-          <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
-
-            {/* Left side - Teams */}
-            <Box sx={{ width: '30%', paddingLeft: '32px' }}>
-              <Typography level="title-md" textColor="text.secondary" component="p" fontWeight={700}>
-                Teams You Lead:
-              </Typography>
-
-              {teams.length > 0 ? (
-                teams.map((team) => (
-                  <Box key={team.id} sx={{ mt: 2, textAlign: 'left' }}>
-                    <Typography level="body-md" component="p">
-                      Team: {team.teamName}
+                <Box sx={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+                  {/* Left side - Teams */}
+                  <Box sx={{ width: '30%', paddingLeft: '32px' }}>
+                    <Typography level="title-md" textColor="text.secondary" component="p" fontWeight={700}>
+                      Teams You Lead:
                     </Typography>
-                    <Button
-                      variant="solid"
-                      size="sm"
-                      sx={{ mt: 1 }}
-                      onClick={() => handleTeamSelect(team)}
-                    >
-                      {selectedTeamId === team.id ? 'Hide Join Requests' : 'View Join Requests'}
-                    </Button>
-                  </Box>
-                ))
-              ) : (
-                <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
-                  You are not the leader of any teams.
-                </Typography>
-              )}
-          </Box>
 
-          {/* Right side - Join Requests */}
-          <Box sx={{ width: '50%', paddingLeft: '32px' }}>
-            {selectedTeamId && joinRequests.length > 0 && (
-              <Box sx={{ textAlign: 'left' }}>
-                <Typography level="title-md" textColor="text.secondary" component="p" fontWeight={700}>
-                  Join Requests:
-                </Typography>
+                    {teams.length > 0 ? (
+                      teams.map((team) => (
+                        <Box key={team.id} sx={{ mt: 2, textAlign: 'left' }}>
+                          <Typography level="body-md" component="p">
+                            Team: {team.teamName}
+                          </Typography>
+                          <Button
+                            variant="solid"
+                            size="sm"
+                            sx={{ mt: 1 }}
+                            onClick={() => handleTeamSelect(team)}
+                          >
+                            {selectedTeamId === team.id ? 'Hide Join Requests' : 'View Join Requests'}
+                          </Button>
 
-                {requestingUsers.length > 0 ? (
-                  requestingUsers.map((user) => (
-                    <Box key={user.id} sx={{ mt: 1 }}>
-                      <Typography level="body-md" component="p">
-                        Request from: {user.name}
+                          {/* Button to show the list of players */}
+                          <Button
+                            variant="outlined"
+                            size="sm"
+                            sx={{ mt: 1 }}
+                            onClick={() => handleShowPlayers(team.id)}
+                          >
+                            {showPlayers ? 'Hide Players' : 'Manage Players'}
+                          </Button>
+                        </Box>
+                      ))
+                    ) : (
+                      <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
+                        You are not the leader of any teams.
                       </Typography>
-                      <Button variant="solid" size="sm" sx={{ mt: 1, mr: 1 }} onClick={() => handleAcceptRequest(selectedTeamId, user.id)}>
-                        Accept
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        size="sm"
-                        sx={{ mb: 2 }}
-                        onClick={() => handleDenyRequest(selectedTeamId, user.id)}
-                      >
-                        Deny
-                      </Button>
-                    </Box>
-                  ))
-                ) : (
-                  <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
-                    No join requests.
-                  </Typography>
-                )}
-              </Box>
-            )}
-          </Box>
-      </Box>
+                    )}
+                  </Box>
 
+                  {/* Right side - Join Requests */}
+                  <Box sx={{ width: '50%', paddingLeft: '32px' }}>
+                    {selectedTeamId && joinRequests.length > 0 && (
+                      <Box sx={{ textAlign: 'left' }}>
+                        <Typography level="title-md" textColor="text.secondary" component="p" fontWeight={700}>
+                          Join Requests:
+                        </Typography>
+
+                        {requestingUsers.length > 0 ? (
+                          requestingUsers.map((user) => (
+                            <Box key={user.id} sx={{ mt: 1 }}>
+                              <Typography level="body-md" component="p">
+                                Request from: {user.name}
+                              </Typography>
+                              <Button variant="solid" size="sm" sx={{ mt: 1, mr: 1 }} onClick={() => handleAcceptRequest(selectedTeamId, user.id)}>
+                                Accept
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                size="sm"
+                                sx={{ mb: 2 }}
+                                onClick={() => handleDenyRequest(selectedTeamId, user.id)}
+                              >
+                                Deny
+                              </Button>
+                            </Box>
+                          ))
+                        ) : (
+                          <Typography level="body-md" textColor="text.secondary" sx={{ mt: 2 }}>
+                            No join requests.
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+
+                    {/* Show players in the selected team */}
+                    {showPlayers && teamPlayers.length > 0 && (
+                      <Box sx={{ textAlign: 'left', mt: 4 }}>
+                        <Typography level="title-md" textColor="text.secondary" component="p" fontWeight={700}>
+                          Team Players:
+                        </Typography>
+
+                        {teamPlayers.map((player) => (
+                          <Box key={player.id} sx={{ mt: 1 }}>
+                            <Typography level="body-md" component="p">
+                              Player: {player.name}
+                            </Typography>
+                            <Button
+                              variant="outlined"
+                              size="sm"
+                              sx={{ mt: 1 }}
+                              onClick={() => handleRemovePlayer(selectedTeamId!, player.id)}
+                            >
+                              Remove Player
+                            </Button>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
               </>
-
             ) : (
               <Typography level="title-lg" textColor="text.secondary" component="h1">
                 No user logged in. Please log in to view your data.
