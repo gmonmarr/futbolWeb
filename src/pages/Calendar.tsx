@@ -10,6 +10,8 @@ import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { getDoc } from 'firebase/firestore';
 import Header from '../components_team/Header.tsx';
 import Layout from '../components_team/Layout.tsx';
+import logo from '../assets/teclogo1.png'; 
+
 
 // Define un tipo para las filas
 interface Partido {
@@ -372,7 +374,7 @@ const FixedSizeGrid = () => {
       </Layout.Header>
   
       <Layout.SideNav>
-        Patrocinadores
+        <img src={logo} alt="Logo" width="170" />
       </Layout.SideNav>
   
       <Layout.Main>

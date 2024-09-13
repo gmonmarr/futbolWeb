@@ -12,6 +12,8 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Layout from '../components_team/Layout.tsx';
 import Header from '../components_team/Header.tsx';
+import logo from '../assets/teclogo1.png'; 
+
 
 
 interface League {
@@ -171,6 +173,7 @@ const LigaDivision: React.FC = () => {
       </Layout.Header>
 
       <Layout.SideNav>
+        <img src={logo} alt="Logo" width="170" />
       </Layout.SideNav>
 
       <Layout.Main>
