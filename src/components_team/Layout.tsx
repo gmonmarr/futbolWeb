@@ -45,6 +45,8 @@ function Header(props: BoxProps) {
           position: 'sticky',
           top: 0,
           zIndex: 1100,
+          backgroundColor: '#dee0e0',
+          
         },
         ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
       ]}
@@ -68,6 +70,7 @@ function SideNav(props: BoxProps) {
             xs: 'none',
             sm: 'initial',
           },
+          backgroundColor: '#dee0e0',
         },
         ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
       ]}
