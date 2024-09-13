@@ -10,14 +10,12 @@ import { useNavigate } from "react-router-dom";
 import './login.css'; // Assuming you will have some CSS for styles
 
 function Login() {
-  const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState(""); // New state for Name
   const [matriculaTEC, setMatriculaTEC] = useState(""); // Matricula TEC
   const [newUser, setNewUser] = useState(false); // Toggle between login and registration
   const [error, setError] = useState("");
-  const [isProfileComplete, setIsProfileComplete] = useState(false); // Track if profile is complete
   const navigate = useNavigate();
 
   // Function to validate Matricula TEC format
@@ -29,20 +27,16 @@ function Login() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        setUser(currentUser);
-  
+        // Fetch user data from Firestore
         const userDoc = await getDoc(doc(db, "users", currentUser.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
           if (userData.matriculaTEC) {
-            setIsProfileComplete(true);
             if (userData.role === 'Admin') {
               navigate("/admin");
             } else {
               navigate("/team");
             }
-          } else {
-            setIsProfileComplete(false);
           }
         }
       }
@@ -84,7 +78,6 @@ function Login() {
     e.preventDefault();
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      setUser(result.user);
 
       const userDoc = await getDoc(doc(db, "users", result.user.uid));
       if (userDoc.exists()) {
@@ -95,8 +88,6 @@ function Login() {
           } else {
             navigate("/create-team");
           }
-        } else {
-          setIsProfileComplete(false);
         }
       } else {
         setError("User data not found");
