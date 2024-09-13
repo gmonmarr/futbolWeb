@@ -1,8 +1,6 @@
-// src/pages/FindTeam.tsx
-
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CssBaseline, Box, Typography, Button, Grid, Card, CardContent, TextField, FormControl, InputLabel, Select, MenuItem, Alert } from '@mui/material'; // Cambiado a Material UI
+import { CssBaseline, Box, Typography, Button, Grid, Card, CardContent, TextField, Alert } from '@mui/material';
 import Layout from '../components_team/Layout.tsx';
 import Header from '../components_team/Header.tsx';
 import Navigation from '../components_team/Navigation.tsx';
@@ -207,75 +205,65 @@ export default function FindTeam() {
                 </Typography>
           </Box>
 
-          <Box sx={{ mt: 3, ml: 2, width: '95%'}}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              {/* League Dropdown */}
-              <FormControl sx={{ mr: 1, minWidth: 160 }}>
-                <InputLabel>Select a League</InputLabel>
-                <Select
-                  value={selectedLeague}
-                  onChange={(e) => {
-                    setSelectedLeague(e.target.value);
-                    setSelectedDivision('');
-                    setTeams([]);
-                  }}
-                  label="Select a League"
-                  size="small" // Reducido el tamaño a small
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  {leagues.map((league) => (
-                    <MenuItem key={league.id} value={league.id}>
-                      {league.leagueName}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+          <Box sx={{ mt: 3, ml: 2, width: '95%' }}>
+            {/* Dropdowns in one row with space between */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
+              <select
+                value={selectedLeague}
+                onChange={(e) => {
+                  setSelectedLeague(e.target.value);
+                  setSelectedDivision('');
+                  setTeams([]);
+                }}
+                required
+                style={{ marginBottom: '10px', padding: '5px', minWidth: '200px' }}
+              >
+                <option value="">Select a League</option>
+                {leagues.map((league) => (
+                  <option key={league.id} value={league.id}>
+                    {league.leagueName}
+                  </option>
+                ))}
+              </select>
 
-              {/* Division Dropdown */}
               {selectedLeague && (
-                <FormControl sx={{ mr: 1, minWidth: 160 }}>
-                  <InputLabel>Select a Division</InputLabel>
-                  <Select
-                    value={selectedDivision}
-                    onChange={(e) => setSelectedDivision(e.target.value)}
-                    label="Select a Division"
-                    size="small" // Reducido el tamaño a small
-                  >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    {divisions.map((division) => (
-                      <MenuItem key={division.id} value={division.id}>
-                        {division.divisionName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <select
+                  value={selectedDivision}
+                  onChange={(e) => setSelectedDivision(e.target.value)}
+                  required
+                  style={{ marginBottom: '10px', padding: '5px', minWidth: '200px' }}
+                >
+                  <option value="">Select a Division</option>
+                  {divisions.map((division) => (
+                    <option key={division.id} value={division.id}>
+                      {division.divisionName}
+                    </option>
+                  ))}
+                </select>
               )}
+            </Box>
 
-              {/* Search by team name */}
+            {/* Search row */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TextField
                 label="Search by Team Name"
                 variant="outlined"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                size="small" // Reducido el tamaño del TextField
+                size="small"
                 sx={{ mr: 1 }}
               />
-              <Button variant="contained" color="primary" onClick={handleSearch} size="small"> {/* Reducido el tamaño a small */}
+              <Button variant="contained" color="primary" onClick={handleSearch} size="small">
                 Search
               </Button>
 
-              {/* Clear Search Button, only visible after a search */}
               {searchPerformed && (
                 <Button
                   variant="outlined"
                   color="primary"
                   onClick={handleClearSearch}
                   size="small"
-                  sx={{ ml: 1 }} // Add margin-left to align with Search button
+                  sx={{ ml: 1 }}
                 >
                   Clear Search
                 </Button>
@@ -288,7 +276,7 @@ export default function FindTeam() {
                   <Grid item xs={12} sm={6} md={4} lg={3} key={team.id}>
                     <Card sx={{ minHeight: '140px' }}>
                       <CardContent>
-                        <Typography variant="subtitle1">{team.teamName}</Typography> {/* Cambié a subtitle1 */}
+                        <Typography variant="subtitle1">{team.teamName}</Typography>
                         <Typography variant="body2">Leader: {team.leaderName}</Typography>
                         <Button
                           variant="contained"
@@ -296,7 +284,7 @@ export default function FindTeam() {
                           sx={{ mt: 1 }}
                           onClick={() => handleJoinRequest(team.id)}
                           disabled={requestedTeams.includes(team.id) || alreadyInTeam}
-                          size="small" // Reducido el tamaño del botón
+                          size="small"
                         >
                           {requestedTeams.includes(team.id) ? 'Request Sent' : 'Request to Join'}
                         </Button>
@@ -306,7 +294,7 @@ export default function FindTeam() {
                 ))}
               </Grid>
             ) : (
-              <Typography variant="body2" sx={{ mt: 2 }}> {/* Reducido el tamaño a body2 */}
+              <Typography variant="body2" sx={{ mt: 2 }}>
                 No teams available in this division.
               </Typography>
             )}
