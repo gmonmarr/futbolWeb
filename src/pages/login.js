@@ -10,8 +10,8 @@ import { useNavigate } from "react-router-dom";
 import './login.css'; // Assuming you will have some CSS for styles
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("example@gmail.com");
+  const [password, setPassword] = useState("12345678");
   const [name, setName] = useState(""); // New state for Name
   const [matriculaTEC, setMatriculaTEC] = useState(""); // Matricula TEC
   const [newUser, setNewUser] = useState(false); // Toggle between login and registration
